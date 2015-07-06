@@ -1,0 +1,36 @@
+{
+	"name": "hofff/contao-recursive-download-folder",
+	"description": "Content element for Contao CMS to define a recursive download folder.",
+	"keywords": [
+		"download",
+		"downloads",
+		"folder",
+		"recursive"
+	],
+	"type": "contao-module",
+	"license": "LGPL-3.0+",
+	"authors": [
+		{
+			"name": "Cliff Parnitzky",
+			"email": "contao@cliff-parnitzky.de",
+			"homepage": "http://hofff.com/",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php": ">=5.3",
+		"contao/core": "~3.2"
+	},
+	"autoload" : {
+		"psr-0": {
+			"Hofff" : "src/"
+		}
+	},
+	"extra" : {
+		"contao" : {
+			"sources" : {
+				"contao-module" : "system/modules/hofff_recursive-download-folder"
+			}
+		}
+	}
+}
