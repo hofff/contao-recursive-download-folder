@@ -1,4 +1,4 @@
-# Shariff – Social media buttons with privacy
+# Recursive Download Folder
 
 Content element for Contao CMS to define a recursive download folder.
 
