@@ -1,0 +1,239 @@
+<?php
+
+/**
+ * Contao Open Source CMS
+ *
+ * Copyright (c) 2005-2015 Leo Feyer
+ *
+ * @package Hofff_recursive-download-folder
+ * @link    https://contao.org
+ * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
+ */
+
+
+/**
+ * Run in a custom namespace, so the class can be replaced
+ */
+namespace Hofff\Contao\RecursiveDownloadFolder;
+
+
+/**
+ * Class ContentDownloads
+ *
+ * Front end content element "downloads".
+ * @copyright  Leo Feyer 2005-2014
+ * @author     Leo Feyer <https://contao.org>
+ * @package    Core
+ */
+class ContentRecursiveDownloadFolder extends \Contao\ContentElement
+{
+
+	/**
+	 * Files object
+	 * @var \FilesModel
+	 */
+	protected $objFolder;
+
+	/**
+	 * Template
+	 * @var string
+	 */
+	protected $strTemplate = 'ce_recursive-download-folder';
+
+
+	/**
+	 * Return if there are no files
+	 * @return string
+	 */
+	public function generate()
+	{
+		// Use the home directory of the current user as file source
+		if ($this->useHomeDir && FE_USER_LOGGED_IN)
+		{
+			$this->import('FrontendUser', 'User');
+
+			if ($this->User->assignDir && $this->User->homeDir)
+			{
+				$this->folderSRC = $this->User->homeDir;
+			}
+		}
+
+		// Return if there is no folder defined
+		if (empty($this->folderSRC))
+		{
+			return '';
+		}
+
+		// Get the folders from the database
+		$this->objFolder = \FilesModel::findByUuid($this->folderSRC);
+		
+		if ($this->objFolder === null)
+		{
+			if (!\Validator::isUuid($this->folderSRC[0]))
+			{
+				return '<p class="error">'.$GLOBALS['TL_LANG']['ERR']['version2format'].'</p>';
+			}
+
+			return '';
+		}
+
+		$file = \Input::get('file', true);
+
+		// Send the file to the browser and do not send a 404 header (see #4632)
+		if ($file != '' && !preg_match('/^meta(_[a-z]{2})?\.txt$/', basename($file)))
+		{
+			if (strpos(dirname($file), $this->objFolder->path) !== FALSE)
+			{
+				\Controller::sendFileToBrowser($file);
+			}
+		}
+
+		return parent::generate();
+	}
+
+
+	/**
+	 * Generate the content element
+	 */
+	protected function compile()
+	{
+		global $objPage;
+
+		$elements = $this->getElements($this->objFolder);
+		$fileTree = array
+		(
+			'type'              => $this->objFolder->type,
+			'data'              => $this->getFolderData($this->objFolder, $objPage),
+			'elements'          => $elements,
+			'elements_rendered' => $this->getElementsRendered($elements)
+		);
+		
+		$this->Template->fileTree = $fileTree;
+		$this->Template->elements = $fileTree['elements_rendered'];
+		
+		if (TL_MODE == 'BE')
+		{
+			// only load the default JS and CSS in backend, for frontend this will be done in template
+			$GLOBALS['TL_CSS']['recursive-download-folder.css'] = 'system/modules/hofff_recursive-download-folder/assets/css/recursive-download-folder.min.css||static';
+			$GLOBALS['TL_JAVASCRIPT']['recursive-download-folder.js'] = 'system/modules/hofff_recursive-download-folder/assets/js/recursive-download-folder.min.js';
+		}
+	}
+	
+	private function getElements ($objParentFolder, $level=1)
+	{
+		$allowedDownload = trimsplit(',', strtolower($GLOBALS['TL_CONFIG']['allowedDownload']));
+		
+		$arrElements = array();
+		$arrFolders = array();
+		$arrFiles = array();
+		
+		$objElements = \FilesModel::findByPid($objParentFolder->uuid);
+
+		if ($objElements === null)
+		{
+			return $arrElements;
+		}
+		
+		while ($objElements->next())
+		{
+			if ($objElements->type == 'folder')
+			{
+				$elements = $this->getElements($objElements, $level+1);
+				$arrFolders[$objElements->name] = array
+				(
+					'type'     => $objElements->type,
+					'data'     => $this->getFolderData($objElements, $objPage),
+					'elements' => $elements,
+					'elements_rendered' => $this->getElementsRendered($elements, $level+1)
+				);
+			}
+			else
+			{
+				$objFile = new \File($objElements->path, true);
+
+				if (in_array($objFile->extension, $allowedDownload) && !preg_match('/^meta(_[a-z]{2})?\.txt$/', $objFile->basename))
+				{
+					$arrFiles[$objFile->basename] = array
+					(
+						'type'     => $objElements->type,
+						'data'     => $this->getFileData($objFile, $objElements, $objPage)
+					);
+				}
+			}
+		}
+		
+		$arrElements = array_values($arrFolders);
+		$arrElements = array_merge($arrElements, array_values($arrFiles));
+		
+		return $arrElements;
+	}
+	
+	/**
+	 * Get all data for a file
+	 */
+	private function getFileData ($objFile, $objParentFolder, $objPage)
+	{
+		$arrMeta = $this->getMetaData($objElements->meta, $objPage->language);
+
+		// Use the file name as title if none is given
+		if ($arrMeta['title'] == '')
+		{
+			$arrMeta['title'] = specialchars($objFile->basename);
+		}
+		
+		$strHref = \Environment::get('request');
+
+		// Remove an existing file parameter (see #5683)
+		if (preg_match('/(&(amp;)?|\?)file=/', $strHref))
+		{
+			$strHref = preg_replace('/(&(amp;)?|\?)file=[^&]+/', '', $strHref);
+		}
+
+		$strHref .= (($GLOBALS['TL_CONFIG']['disableAlias'] || strpos($strHref, '?') !== false) ? '&amp;' : '?') . 'file=' . \System::urlEncode($objParentFolder->path);
+		
+		return array(
+			'id'        => $objFile->id,
+			'uuid'      => $objFile->uuid,
+			'name'      => $objFile->basename,
+			'title'     => $arrMeta['title'],
+			'link'      => $arrMeta['title'],
+			'caption'   => $arrMeta['caption'],
+			'href'      => $strHref,
+			'filesize'  => $this->getReadableSize($objFile->filesize, 1),
+			'icon'      => TL_ASSETS_URL . 'assets/contao/images/' . $objFile->icon,
+			'mime'      => $objFile->mime,
+			'meta'      => $arrMeta,
+			'extension' => $objFile->extension,
+			'path'      => $objFile->dirname
+		);
+	}
+	
+	/**
+	 * Get all data for a folder
+	 */
+	private function getFolderData ($objFolder, $objPage)
+	{
+		$arrMeta = $this->getMetaData($objFolder->meta, $objPage->language);
+		
+		return array(
+			'id'        => $objFolder->id,
+			'uuid'      => $objFolder->uuid,
+			'name'      => $objFolder->name,
+			'path'      => $objFolder->path
+		);
+	}
+	
+	private function getElementsRendered ($elements, $level=1)
+	{
+		// Layout template fallback
+		if ($this->recursiveDownloadFolderTpl == '')
+		{
+			$this->recursiveDownloadFolderTpl = 'recursive-download-folder_default';
+		}
+		
+		$objTemplate = new \FrontendTemplate($this->recursiveDownloadFolderTpl);
+		$objTemplate->level = 'level_' . $level;
+		$objTemplate->elements = $elements;
+		return !empty($elements) ? $objTemplate->parse() : '';
+	}
+}
