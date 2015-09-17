@@ -18,12 +18,12 @@ namespace Hofff\Contao\RecursiveDownloadFolder;
 
 
 /**
- * Class ContentDownloads
+ * Class ContentRecursiveDownloadFolder
  *
- * Front end content element "downloads".
- * @copyright  Leo Feyer 2005-2014
- * @author     Leo Feyer <https://contao.org>
- * @package    Core
+ * Front end content element "hofff_recursive-download-folder".
+ * @copyright  Hofff.com 2015-2015
+ * @author     Cliff Parnitzky <cliff@hofff.com> 
+ * @package    Hofff_recursive-download-folder
  */
 class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 {
@@ -162,6 +162,11 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 			}
 		}
 		
+		// sort the folders and files alphabetically by their name
+		ksort($arrFolders);
+		ksort($arrFiles);
+		
+		// merge folders and files into one array (foders at first, files afterwards)
 		$arrElements = array_values($arrFolders);
 		$arrElements = array_merge($arrElements, array_values($arrFiles));
 		
