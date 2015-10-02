@@ -23,3 +23,7 @@ Provides a content element for Contao CMS to define a recursive download folder.
 ## Dependency
 
 There are no dependencies to other extensions, that have to be installed.
+
+## THANK YOU
+
+- U.A.S. Umwelt- und Agrarstudien GmbH for the initial assignment for this extension
