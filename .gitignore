@@ -2,9 +2,11 @@
 !/.gitignore
 !/.gitattributes
 !/CT_ROOT/
+!/contao-module/
 !/dev/
 !/ext/
 !/publish/
+!/src/
 !/system/
 !/build.xml
 !/README.md
