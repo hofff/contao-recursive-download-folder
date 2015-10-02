@@ -4,7 +4,7 @@
 
 # Contao Extension: hofff.com - Recursive Download Folder
 
-Provides a content element for Contao CMS to define a recursive download folder.
+Provides a content element for Contao CMS to define a recursive download folder (display as tree in the front end).
 
 
 ## Features
@@ -23,6 +23,13 @@ Provides a content element for Contao CMS to define a recursive download folder.
 ## Dependency
 
 There are no dependencies to other extensions, that have to be installed.
+
+
+## Screenshots
+
+![Front end output](screenshot-frontend.jpg)
+![Back end configuration](screenshot-backend.jpg)
+
 
 ## THANK YOU
 
