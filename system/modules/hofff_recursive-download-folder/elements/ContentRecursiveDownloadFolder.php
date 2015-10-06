@@ -99,7 +99,7 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 	{
 		global $objPage;
 
-		$elements = $this->getElements($this->objFolder);
+		$elements = $this->getElements($this->objFolder, $objPage);
 		$fileTree = array
 		(
 			'type'              => $this->objFolder->type,
@@ -119,7 +119,7 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 		}
 	}
 	
-	private function getElements ($objParentFolder, $level=1)
+	private function getElements ($objParentFolder, $objPage, $level=1)
 	{
 		$allowedDownload = trimsplit(',', strtolower($GLOBALS['TL_CONFIG']['allowedDownload']));
 		
@@ -138,7 +138,7 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 		{
 			if ($objElements->type == 'folder')
 			{
-				$elements = $this->getElements($objElements, $level+1);
+				$elements = $this->getElements($objElements, $objPage, $level+1);
 				$arrFolders[$objElements->name] = array
 				(
 					'type'     => $objElements->type,
@@ -176,7 +176,7 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 	/**
 	 * Get all data for a file
 	 */
-	private function getFileData ($objFile, $objParentFolder, $objPage)
+	private function getFileData ($objFile, $objElements, $objPage)
 	{
 		$arrMeta = $this->getMetaData($objElements->meta, $objPage->language);
 
@@ -184,6 +184,12 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 		if ($arrMeta['title'] == '')
 		{
 			$arrMeta['title'] = specialchars($objFile->basename);
+		}
+		
+		// Use the title as link if none is given
+		if ($arrMeta['link'] == '')
+		{
+			$arrMeta['link'] = $arrMeta['title'];
 		}
 		
 		$strHref = \Environment::get('request');
@@ -194,14 +200,14 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 			$strHref = preg_replace('/(&(amp;)?|\?)file=[^&]+/', '', $strHref);
 		}
 
-		$strHref .= (($GLOBALS['TL_CONFIG']['disableAlias'] || strpos($strHref, '?') !== false) ? '&amp;' : '?') . 'file=' . \System::urlEncode($objParentFolder->path);
+		$strHref .= (($GLOBALS['TL_CONFIG']['disableAlias'] || strpos($strHref, '?') !== false) ? '&amp;' : '?') . 'file=' . \System::urlEncode($objElements->path);
 		
 		return array(
 			'id'        => $objFile->id,
 			'uuid'      => $objFile->uuid,
 			'name'      => $objFile->basename,
 			'title'     => $arrMeta['title'],
-			'link'      => $arrMeta['title'],
+			'link'      => $arrMeta['link'],
 			'caption'   => $arrMeta['caption'],
 			'href'      => $strHref,
 			'filesize'  => $this->getReadableSize($objFile->filesize, 1),
@@ -220,10 +226,25 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 	{
 		$arrMeta = $this->getMetaData($objFolder->meta, $objPage->language);
 		
+		// Use the folder name as title if none is given
+		if ($arrMeta['title'] == '')
+		{
+			$arrMeta['title'] = $objFolder->name;
+		}
+		
+		// Use the title as link if none is given
+		if ($arrMeta['link'] == '')
+		{
+			$arrMeta['link'] = $arrMeta['title'];
+		}
+		
 		return array(
 			'id'        => $objFolder->id,
 			'uuid'      => $objFolder->uuid,
 			'name'      => $objFolder->name,
+			'title'     => $arrMeta['title'],
+			'link'      => $arrMeta['link'],
+			'meta'      => $arrMeta,
 			'path'      => $objFolder->path
 		);
 	}

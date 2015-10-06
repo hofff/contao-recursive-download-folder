@@ -1,7 +1,7 @@
 <ul class="<?php echo $this->level; ?>"> 
   <?php foreach ($this->elements as $element): ?>
 <?php if ($element['type'] == 'folder'): ?>
-    <li class="folder"><a onclick="toggleFolder(this);" title="<?php echo $element['data']['name']; ?>"><?php echo $element['data']['name']; ?></a><?php echo $element['elements_rendered']; ?></li>
+    <li class="folder"><a onclick="toggleFolder(this);" title="<?php echo $element['data']['title']; ?>"><?php echo $element['data']['link']; ?></a><?php echo $element['elements_rendered']; ?></li>
 <?php else: ?>
     <li class="file"><img src="<?php echo $element['data']['icon']; ?>" width="18" height="18" alt="" class="mime_icon"><a href="<?php echo $element['data']['href']; ?>" title="<?php echo $element['data']['title']; ?>"><?php echo $element['data']['link']; ?> <span class="size">(<?php echo $element['data']['filesize']; ?>)</span></a></li>
 <?php endif; ?>
