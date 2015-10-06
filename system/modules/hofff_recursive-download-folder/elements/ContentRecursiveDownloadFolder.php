@@ -144,7 +144,8 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 					'type'     => $objElements->type,
 					'data'     => $this->getFolderData($objElements, $objPage),
 					'elements' => $elements,
-					'elements_rendered' => $this->getElementsRendered($elements, $level+1)
+					'elements_rendered' => $this->getElementsRendered($elements, $level+1),
+					'is_empty' => empty($elements)
 				);
 			}
 			else
