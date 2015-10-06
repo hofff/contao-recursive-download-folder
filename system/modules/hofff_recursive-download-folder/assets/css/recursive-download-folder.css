@@ -1,11 +1,7 @@
-.ce_hofff_recursive-download-folder .level_1 ul
+.ce_hofff_recursive-download-folder .folder > a
 {
-	margin-left: 16px;
-}
-
-.ce_hofff_recursive-download-folder .folder
-{
-	background: url('../folder.png') no-repeat left top;
+	font-weight: bold;
+	cursor: pointer;
 }
 
 .ce_hofff_recursive-download-folder .folder > ul
@@ -13,23 +9,7 @@
 	display: none;
 }
 
-.ce_hofff_recursive-download-folder .folder > a
-{
-	padding-left: 20px;
-	cursor: pointer;
-}
-
-.ce_hofff_recursive-download-folder .folder-open
-{
-	background: url('../folder-open.png') no-repeat left top;
-	}
-
 .ce_hofff_recursive-download-folder .folder-open > ul
 {
 	display: block;
-}
-
-.ce_hofff_recursive-download-folder .mime_icon
-{
-	padding-right: 2px;
 }
