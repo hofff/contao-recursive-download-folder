@@ -34,4 +34,4 @@ There are no dependencies to other extensions, that have to be installed.
 ## THANK YOU
 
 - U.A.S. Umwelt- und Agrarstudien GmbH for the initial assignment for this extension
-- Nina Gerling - ena Webstudio for support development and bug fixing
+- Nina Gerling - ena Webstudio for the support of development and bug fixing
