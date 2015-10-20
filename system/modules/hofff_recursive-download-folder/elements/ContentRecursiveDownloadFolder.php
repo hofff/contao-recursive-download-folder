@@ -169,11 +169,14 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 
 				if (in_array($objFile->extension, $allowedDownload) && !preg_match('/^meta(_[a-z]{2})?\.txt$/', $objFile->basename))
 				{
-					$strCssClass = 'file';
+					$arrFileData = $this->getFileData($objFile, $objElements, $objPage);
+					
+					$strCssClass = 'file file-' . $arrFileData['extension'];
+					
 					$arrFiles[$objFile->basename] = array
 					(
 						'type'      => $objElements->type,
-						'data'      => $this->getFileData($objFile, $objElements, $objPage),
+						'data'      => $arrFileData,
 						'css_class' => $strCssClass
 					);
 				}
