@@ -142,13 +142,24 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 				
 				if ($this->recursiveDownloadFolderHideEmptyFolders && !empty($elements) || !$this->recursiveDownloadFolderHideEmptyFolders)
 				{
+					$strCssClass = 'folder';
+					if ($this->recursiveDownloadFolderShowAllLevels)
+					{
+						$strCssClass .= ' folder-open';
+					}
+					if (empty($elements))
+					{
+						$strCssClass .= ' folder-empty';
+					}
+					
 					$arrFolders[$objElements->name] = array
 					(
 						'type'     => $objElements->type,
 						'data'     => $this->getFolderData($objElements, $objPage),
 						'elements' => $elements,
 						'elements_rendered' => $this->getElementsRendered($elements, $level+1),
-						'is_empty' => empty($elements)
+						'is_empty' => empty($elements),
+						'css_class' => $strCssClass
 					);
 				}
 			}
@@ -158,10 +169,12 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 
 				if (in_array($objFile->extension, $allowedDownload) && !preg_match('/^meta(_[a-z]{2})?\.txt$/', $objFile->basename))
 				{
+					$strCssClass = 'file';
 					$arrFiles[$objFile->basename] = array
 					(
-						'type'     => $objElements->type,
-						'data'     => $this->getFileData($objFile, $objElements, $objPage)
+						'type'      => $objElements->type,
+						'data'      => $this->getFileData($objFile, $objElements, $objPage),
+						'css_class' => $strCssClass
 					);
 				}
 			}
