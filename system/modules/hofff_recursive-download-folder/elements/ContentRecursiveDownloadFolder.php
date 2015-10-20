@@ -139,14 +139,18 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 			if ($objElements->type == 'folder')
 			{
 				$elements = $this->getElements($objElements, $objPage, $level+1);
-				$arrFolders[$objElements->name] = array
-				(
-					'type'     => $objElements->type,
-					'data'     => $this->getFolderData($objElements, $objPage),
-					'elements' => $elements,
-					'elements_rendered' => $this->getElementsRendered($elements, $level+1),
-					'is_empty' => empty($elements)
-				);
+				
+				if ($this->recursiveDownloadFolderHideEmptyFolders && !empty($elements) || !$this->recursiveDownloadFolderHideEmptyFolders)
+				{
+					$arrFolders[$objElements->name] = array
+					(
+						'type'     => $objElements->type,
+						'data'     => $this->getFolderData($objElements, $objPage),
+						'elements' => $elements,
+						'elements_rendered' => $this->getElementsRendered($elements, $level+1),
+						'is_empty' => empty($elements)
+					);
+				}
 			}
 			else
 			{
