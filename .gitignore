@@ -9,6 +9,7 @@
 !/src/
 !/system/
 !/build.xml
+!/CHANGELOG.md
 !/README.md
 !/composer.json
 !/screenshot*.jpg
