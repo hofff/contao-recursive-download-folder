@@ -1,6 +1,9 @@
 Contao Extension "hofff/contao-recursive-download-folder"
 ---------------------------------------------------------
 
+### Version 2.1.0 (2017-0x-xx) ###
+- Added an optional search for files names
+
 ### Version 2.0.0 (2016-11-06) ###
 - Final version with consolidation of changes in version 2.0.0-beta1 and 2.0.0-beta2
 
