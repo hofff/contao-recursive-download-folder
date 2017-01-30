@@ -187,7 +187,8 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 						{
 							$visibleFileName = $arrFileData['link'];
 						}
-						$fileMatches = (strpos($visibleFileName, trim(\Input::get('keyword'))) !== FALSE);
+						// use exact, case insensitive string search
+            $fileMatches = (stripos($visibleFileName, trim(\Input::get('keyword'))) !== FALSE);
 					}
 
 					if ($fileMatches)
