@@ -7,6 +7,16 @@ $GLOBALS['TL_BODY']['recursive-download-folder.js'] = '<script src="system/modul
   <?php if ($this->headline): ?>
     <<?php echo $this->hl; ?>><?php echo $this->headline; ?></<?php echo $this->hl; ?>>
   <?php endif; ?>
+  
+  <?php if ($this->searchable): ?>
+    <form<?php if ($this->action): ?> action="<?php echo $this->action; ?>"<?php endif; ?> method="get">
+      <div class="formbody">
+        <label for="ctrl_keywords_<?php echo $this->id; ?>" class="invisible"><?php echo $this->keywordLabel; ?></label>
+        <input type="text" name="keyword" id="ctrl_keyword_<?php echo $this->id; ?>" class="text" value="<?php echo $this->keyword; ?>" />
+        <input type="submit" id="ctrl_submit_<?php echo $this->id; ?>" class="submit" value="<?php echo $this->searchLabel; ?>" />
+      </div>
+    </form>
+  <?php endif; ?>
 
   <?php echo $this->v2warning; ?>
 
