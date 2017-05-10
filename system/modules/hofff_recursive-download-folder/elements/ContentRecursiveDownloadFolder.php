@@ -108,8 +108,16 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 			'elements_rendered' => $this->getElementsRendered($elements)
 		);
 		
-		$this->Template->fileTree = $fileTree;
-		$this->Template->elements = $fileTree['elements_rendered'];
+		$this->Template->fileTree   = $fileTree;
+		$this->Template->elements   = $fileTree['elements_rendered'];
+		$this->Template->searchable = $this->recursiveDownloadFolderAllowFileSearch;
+		if ($this->recursiveDownloadFolderAllowFileSearch)
+		{
+			$this->Template->action = ampersand(\Environment::get('indexFreeRequest')); 
+			$this->Template->keyword = trim(\Input::get('keyword')); 
+			$this->Template->keywordLabel = specialchars($GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderKeywordLabel']);
+			$this->Template->searchLabel = specialchars($GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderSearchLabel']);
+		}
 		
 		if (TL_MODE == 'BE')
 		{
@@ -171,14 +179,29 @@ class ContentRecursiveDownloadFolder extends \Contao\ContentElement
 				{
 					$arrFileData = $this->getFileData($objFile, $objElements, $objPage);
 					
-					$strCssClass = 'file file-' . $arrFileData['extension'];
-					
-					$arrFiles[$objFile->basename] = array
-					(
-						'type'      => $objElements->type,
-						'data'      => $arrFileData,
-						'css_class' => $strCssClass
-					);
+					$fileMatches = true;
+					if ($this->recursiveDownloadFolderAllowFileSearch && !empty(trim(\Input::get('keyword'))))
+					{
+						$visibleFileName = $arrFileData['name'];
+						if (!empty($arrFileData['link']))
+						{
+							$visibleFileName = $arrFileData['link'];
+						}
+						// use exact, case insensitive string search
+            $fileMatches = (stripos($visibleFileName, trim(\Input::get('keyword'))) !== FALSE);
+					}
+
+					if ($fileMatches)
+					{
+						$strCssClass = 'file file-' . $arrFileData['extension'];
+						
+						$arrFiles[$objFile->basename] = array
+						(
+							'type'      => $objElements->type,
+							'data'      => $arrFileData,
+							'css_class' => $strCssClass
+						);
+					}
 				}
 			}
 		}

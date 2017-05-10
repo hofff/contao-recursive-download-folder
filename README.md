@@ -12,6 +12,7 @@ Provides a content element for Contao CMS to define a recursive download folder 
 - select a folder inside Contao `files` or use the user directory (for logged frontend members)
 - delivers default CSS and JavaScript (could be customized in templates)
 - define a custom template for rendering the levels
+- offers an optional file search
 
 
 ## Compatibility
@@ -34,8 +35,8 @@ There are no dependencies to other extensions, that have to be installed.
 
 ## Screenshots
 
-![Front end output](screenshot-frontend.jpg)
-![Back end configuration](screenshot-backend.jpg)
+![Front end output](screenshot-frontend.png)
+![Back end configuration](screenshot-backend.png)
 
 
 ## THANK YOU

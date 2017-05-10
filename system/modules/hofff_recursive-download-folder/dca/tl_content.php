@@ -3,7 +3,7 @@
 $GLOBALS['TL_DCA']['tl_content']['palettes']['hofff_recursive-download-folder']
 	= '{type_legend},type,headline'
 	. ';{source_legend},folderSRC,useHomeDir'
-	. ';{recursive-download-folder_legend},recursiveDownloadFolderHideEmptyFolders,recursiveDownloadFolderShowAllLevels'
+	. ';{recursive-download-folder_legend},recursiveDownloadFolderHideEmptyFolders,recursiveDownloadFolderShowAllLevels,recursiveDownloadFolderAllowFileSearch'
 	. ';{template_legend:hide},recursiveDownloadFolderTpl,customTpl'
 	. ';{protected_legend:hide},protected'
 	. ';{expert_legend:hide},guests,cssID,space'
@@ -28,6 +28,14 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['recursiveDownloadFolderHideEmptyFold
 $GLOBALS['TL_DCA']['tl_content']['fields']['recursiveDownloadFolderShowAllLevels'] = array
 (
 	'label'		=> &$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderShowAllLevels'],
+	'exclude'	=> true,
+	'inputType'	=> 'checkbox',
+	'eval'	=> array('tl_class'=>'w50'),
+	'sql'	=> "char(1) NOT NULL default ''" 
+);
+$GLOBALS['TL_DCA']['tl_content']['fields']['recursiveDownloadFolderAllowFileSearch'] = array
+(
+	'label'		=> &$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderAllowFileSearch'],
 	'exclude'	=> true,
 	'inputType'	=> 'checkbox',
 	'eval'	=> array('tl_class'=>'w50'),
