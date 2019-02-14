@@ -20,6 +20,7 @@ use function array_map;
 use function array_merge;
 use function array_values;
 use function basename;
+use function count;
 use function dirname;
 use function explode;
 use function in_array;
@@ -35,6 +36,11 @@ use function trim;
  * Class ContentRecursiveDownloadFolder
  *
  * Front end content element "hofff_recursive-download-folder".
+ *
+ * @property mixed recursiveDownloadFolderHideEmptyFolders
+ * @property mixed recursiveDownloadFolderAllowFileSearch
+ * @property mixed recursiveDownloadFolderShowAllLevels
+ * @property mixed recursiveDownloadFolderTpl
  */
 class RecursiveDownloadFolderElement extends ContentElement
 {
@@ -177,9 +183,9 @@ class RecursiveDownloadFolderElement extends ContentElement
                     ];
                 }
             } else {
-                $objFile = new File($objElements->path, true);
+                $objFile = new File($objElements->path);
 
-                if (in_array($objFile->extension, $allowedDownload) && ! preg_match(
+                if (in_array($objFile->extension, $allowedDownload, true) && ! preg_match(
                     '/^meta(_[a-z]{2})?\.txt$/',
                     $objFile->basename
                 )) {
@@ -224,18 +230,18 @@ class RecursiveDownloadFolderElement extends ContentElement
      *
      * @return mixed[]
      */
-    private function getFileData(FilesModel $objFile, Collection $objElements, PageModel $objPage) : array
+    private function getFileData(File $objFile, Collection $objElements, PageModel $objPage) : array
     {
-        $arrMeta = $this->getMetaData($objElements->meta, $objPage->language);
+        $meta = self::getMetaData($objElements->meta, $objPage->language);
 
         // Use the file name as title if none is given
-        if ($arrMeta['title'] === '') {
-            $arrMeta['title'] = StringUtil::specialchars($objFile->basename);
+        if ($meta['title'] === '') {
+            $meta['title'] = StringUtil::specialchars($objFile->basename);
         }
 
         // Use the title as link if none is given
-        if ($arrMeta['link'] === '') {
-            $arrMeta['link'] = $arrMeta['title'];
+        if ($meta['link'] === '') {
+            $meta['link'] = $meta['title'];
         }
 
         $strHref = Environment::get('request');
@@ -254,14 +260,14 @@ class RecursiveDownloadFolderElement extends ContentElement
             'id'        => $objFile->id,
             'uuid'      => $objFile->uuid,
             'name'      => $objFile->basename,
-            'title'     => $arrMeta['title'],
-            'link'      => $arrMeta['link'],
-            'caption'   => $arrMeta['caption'],
+            'title'     => $meta['title'],
+            'link'      => $meta['link'],
+            'caption'   => $meta['caption'],
             'href'      => $strHref,
-            'filesize'  => $this->getReadableSize($objFile->filesize, 1),
+            'filesize'  => self::getReadableSize($objFile->filesize, 1),
             'icon'      => TL_ASSETS_URL . 'assets/contao/images/' . $objFile->icon,
             'mime'      => $objFile->mime,
-            'meta'      => $arrMeta,
+            'meta'      => $meta,
             'extension' => $objFile->extension,
             'path'      => $objFile->dirname,
         ];
@@ -305,10 +311,18 @@ class RecursiveDownloadFolderElement extends ContentElement
             $this->recursiveDownloadFolderTpl = 'recursive-download-folder_default';
         }
 
-        $objTemplate           = new FrontendTemplate($this->recursiveDownloadFolderTpl);
-        $objTemplate->level    = 'level_' . $level;
-        $objTemplate->elements = $elements;
+        if (count($elements) === 0) {
+            return '';
+        }
 
-        return ! empty($elements) ? $objTemplate->parse() : '';
+        $template = new FrontendTemplate($this->recursiveDownloadFolderTpl);
+        $template->setData(
+            [
+                'level'    => 'level_' . $level,
+                'elements' => $elements,
+            ]
+        );
+
+        return $template->parse();
     }
 }
