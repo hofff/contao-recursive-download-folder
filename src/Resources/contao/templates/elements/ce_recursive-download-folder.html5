@@ -1,13 +1,13 @@
 <?php
 $GLOBALS['TL_CSS']['recursive-download-folder.css'] = 'bundles/hofffcontaorecursivedownloadfolder/css/recursive-download-folder.min.css||static';
-$GLOBALS['TL_JAVASCRIPT']['recursive-download-folder.js'] = 'bundles/hofffcontaorecursivedownloadfolder/js/recursive-download-folder.min.js';
+$GLOBALS['TL_JAVASCRIPT']['recursive-download-folder.js'] = 'bundles/hofffcontaorecursivedownloadfolder/js/recursive-download-folder.min.js|static';
 ?>
 <div class="<?php echo $this->class; ?> block"<?php echo $this->cssID; ?><?php if ($this->style): ?> style="<?php echo $this->style; ?>"<?php endif; ?>>
 
   <?php if ($this->headline): ?>
     <<?php echo $this->hl; ?>><?php echo $this->headline; ?></<?php echo $this->hl; ?>>
   <?php endif; ?>
-  
+
   <?php if ($this->searchable): ?>
     <form<?php if ($this->action): ?> action="<?php echo $this->action; ?>"<?php endif; ?> method="get">
       <div class="formbody">
@@ -18,8 +18,6 @@ $GLOBALS['TL_JAVASCRIPT']['recursive-download-folder.js'] = 'bundles/hofffcontao
     </form>
   <?php endif; ?>
 
-  <?php echo $this->v2warning; ?>
-
-  <?php echo $this->elements; ?> 
+  <?php echo $this->elements; ?>
 
 </div>
