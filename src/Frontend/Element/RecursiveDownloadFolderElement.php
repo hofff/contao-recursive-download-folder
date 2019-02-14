@@ -11,8 +11,6 @@ use Contao\File;
 use Contao\FilesModel;
 use Contao\FrontendTemplate;
 use Contao\Input;
-use Contao\Model\Collection;
-use Contao\PageModel;
 use Contao\StringUtil;
 use Contao\System;
 use Contao\Validator;
@@ -92,7 +90,7 @@ class RecursiveDownloadFolderElement extends ContentElement
         $file = Input::get('file', true);
 
         // Send the file to the browser and do not send a 404 header (see #4632)
-        if ($file !== '' && ! preg_match('/^meta(_[a-z]{2})?\.txt$/', basename($file))) {
+        if ($file !== '' && $file !== null && ! preg_match('/^meta(_[a-z]{2})?\.txt$/', basename($file))) {
             if (strpos(dirname($file), $this->objFolder->path) !== false) {
                 Controller::sendFileToBrowser($file);
             }
@@ -107,12 +105,10 @@ class RecursiveDownloadFolderElement extends ContentElement
      */
     protected function compile() : void
     {
-        $objPage = $GLOBALS['objPage'];
-
-        $elements = $this->getElements($this->objFolder, $objPage);
+        $elements = $this->getElements($this->objFolder);
         $fileTree = [
             'type'              => $this->objFolder->type,
-            'data'              => $this->getFolderData($this->objFolder, $objPage),
+            'data'              => $this->getFolderData($this->objFolder),
             'elements'          => $elements,
             'elements_rendered' => $this->getElementsRendered($elements),
         ];
@@ -122,7 +118,7 @@ class RecursiveDownloadFolderElement extends ContentElement
         $this->Template->searchable = $this->recursiveDownloadFolderAllowFileSearch;
         if ($this->recursiveDownloadFolderAllowFileSearch) {
             $this->Template->action       = preg_replace('/&(amp;)?/i', '&amp;', Environment::get('indexFreeRequest'));
-            $this->Template->keyword      = trim(Input::get('keyword'));
+            $this->Template->keyword      = trim((string) Input::get('keyword'));
             $this->Template->keywordLabel = StringUtil::specialchars(
                 $GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderKeywordLabel']
             );
@@ -144,23 +140,23 @@ class RecursiveDownloadFolderElement extends ContentElement
     }
 
     /** @return mixed[][] */
-    private function getElements(FilesModel $objParentFolder, PageModel $objPage, int $level = 1) : array
+    private function getElements(FilesModel $objParentFolder, int $level = 1) : array
     {
         $allowedDownload = array_map('trim', explode(',', strtolower($GLOBALS['TL_CONFIG']['allowedDownload'])));
 
-        $arrElements = [];
-        $arrFolders  = [];
-        $arrFiles    = [];
+        $elements = [];
+        $folders  = [];
+        $files    = [];
 
         $objElements = FilesModel::findByPid($objParentFolder->uuid);
 
         if ($objElements === null) {
-            return $arrElements;
+            return $elements;
         }
 
-        while ($objElements->next()) {
-            if ($objElements->type === 'folder') {
-                $elements = $this->getElements($objElements, $objPage, $level + 1);
+        foreach ($objElements as $objElement) {
+            if ($objElement->type === 'folder') {
+                $elements = $this->getElements($objElement, $level + 1);
 
                 if (($this->recursiveDownloadFolderHideEmptyFolders && ! empty($elements))
                     || ! $this->recursiveDownloadFolderHideEmptyFolders
@@ -173,9 +169,9 @@ class RecursiveDownloadFolderElement extends ContentElement
                         $strCssClass .= ' folder-empty';
                     }
 
-                    $arrFolders[$objElements->name] = [
-                        'type'              => $objElements->type,
-                        'data'              => $this->getFolderData($objElements, $objPage),
+                    $folders[$objElement->name] = [
+                        'type'              => $objElement->type,
+                        'data'              => $this->getFolderData($objElement),
                         'elements'          => $elements,
                         'elements_rendered' => $this->getElementsRendered($elements, $level + 1),
                         'is_empty'          => empty($elements),
@@ -183,16 +179,18 @@ class RecursiveDownloadFolderElement extends ContentElement
                     ];
                 }
             } else {
-                $objFile = new File($objElements->path);
+                $objFile = new File($objElement->path);
 
                 if (in_array($objFile->extension, $allowedDownload, true) && ! preg_match(
                     '/^meta(_[a-z]{2})?\.txt$/',
                     $objFile->basename
                 )) {
-                    $arrFileData = $this->getFileData($objFile, $objElements, $objPage);
-
+                    $arrFileData = $this->getFileData($objFile, $objElement);
                     $fileMatches = true;
-                    if ($this->recursiveDownloadFolderAllowFileSearch && ! empty(trim(Input::get('keyword')))) {
+
+                    if ($this->recursiveDownloadFolderAllowFileSearch &&
+                        ! empty(trim((string) Input::get('keyword')))
+                    ) {
                         $visibleFileName = $arrFileData['name'];
                         if (! empty($arrFileData['link'])) {
                             $visibleFileName = $arrFileData['link'];
@@ -204,8 +202,8 @@ class RecursiveDownloadFolderElement extends ContentElement
                     if ($fileMatches) {
                         $strCssClass = 'file file-' . $arrFileData['extension'];
 
-                        $arrFiles[$objFile->basename] = [
-                            'type'      => $objElements->type,
+                        $files[$objFile->basename] = [
+                            'type'      => $objElement->type,
                             'data'      => $arrFileData,
                             'css_class' => $strCssClass,
                         ];
@@ -215,14 +213,14 @@ class RecursiveDownloadFolderElement extends ContentElement
         }
 
         // sort the folders and files alphabetically by their name
-        ksort($arrFolders);
-        ksort($arrFiles);
+        ksort($folders);
+        ksort($files);
 
         // merge folders and files into one array (foders at first, files afterwards)
-        $arrElements = array_values($arrFolders);
-        $arrElements = array_merge($arrElements, array_values($arrFiles));
+        $elements = array_values($folders);
+        $elements = array_merge($elements, array_values($files));
 
-        return $arrElements;
+        return $elements;
     }
 
     /**
@@ -230,19 +228,12 @@ class RecursiveDownloadFolderElement extends ContentElement
      *
      * @return mixed[]
      */
-    private function getFileData(File $objFile, Collection $objElements, PageModel $objPage) : array
+    private function getFileData(File $objFile, FilesModel $fileModel) : array
     {
-        $meta = self::getMetaData($objElements->meta, $objPage->language);
+        $meta = self::getMetaData($fileModel->meta, $GLOBALS['TL_LANGUAGE']);
 
         // Use the file name as title if none is given
-        if ($meta['title'] === '') {
-            $meta['title'] = StringUtil::specialchars($objFile->basename);
-        }
-
-        // Use the title as link if none is given
-        if ($meta['link'] === '') {
-            $meta['link'] = $meta['title'];
-        }
+        $meta['title'] = ($meta['title'] ?? StringUtil::specialchars($objFile->basename));
 
         $strHref = Environment::get('request');
 
@@ -254,17 +245,17 @@ class RecursiveDownloadFolderElement extends ContentElement
         $strHref .= ($GLOBALS['TL_CONFIG']['disableAlias'] || strpos(
             $strHref,
             '?'
-        ) !== false ? '&amp;' : '?') . 'file=' . System::urlEncode($objElements->path);
+        ) !== false ? '&amp;' : '?') . 'file=' . System::urlEncode($fileModel->path);
 
         return [
             'id'        => $objFile->id,
             'uuid'      => $objFile->uuid,
             'name'      => $objFile->basename,
             'title'     => $meta['title'],
-            'link'      => $meta['link'],
+            'link'      => ($meta['link'] ?? $meta['title']),
             'caption'   => $meta['caption'],
             'href'      => $strHref,
-            'filesize'  => self::getReadableSize($objFile->filesize, 1),
+            'filesize'  => self::getReadableSize($objFile->filesize),
             'icon'      => TL_ASSETS_URL . 'assets/contao/images/' . $objFile->icon,
             'mime'      => $objFile->mime,
             'meta'      => $meta,
@@ -278,9 +269,9 @@ class RecursiveDownloadFolderElement extends ContentElement
      *
      * @return mixed[]
      */
-    private function getFolderData(FilesModel $objFolder, PageModel $objPage) : array
+    private function getFolderData(FilesModel $objFolder) : array
     {
-        $arrMeta = self::getMetaData($objFolder->meta, $objPage->language);
+        $arrMeta = self::getMetaData($objFolder->meta, $GLOBALS['TL_LANGUAGE']);
 
         // Use the folder name as title if none is given
         if ($arrMeta['title'] === '') {
