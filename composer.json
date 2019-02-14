@@ -1,52 +1,52 @@
 {
-	"name": "hofff/contao-recursive-download-folder",
-	"description": "Content element for Contao CMS to define a recursive download folder.",
-	"keywords": [
-		"download",
-		"downloads",
-		"folder",
-		"recursive"
-	],
-	"type": "contao-bundle",
-	"license": "LGPL-3.0-or-later",
-	"homepage" : "https://www.hofff.com",
-	"authors": [
-		{
-			"name": "Cliff Parnitzky",
-			"email": "cliff@hofff.com",
-			"homepage": "https://www.hofff.com",
-			"role": "Developer"
-		},
-		{
-			"name": "David Molineus",
-			"email": "david@hofff.com",
-			"homepage": "https://www.hofff.com",
-			"role": "Developer"
-		}
-	],
-	"require": {
-		"php": ">=7.1",
-		"contao/core-bundle":"^4.4",
-		"symfony/config": "^3.3 || ^4.0",
-		"symfony/dependency-injection": "^3.3 || ^4.0",
-		"symfony/http-kernel": "^3.3 || ^4.0"
-	},
-	"require-dev": {
-		"contao/manager-plugin": "^2.1"
-	},
-	"conflict": {
-		"contao/manager-plugin": "<2.1 || >= 3.0"
-	},
-	"autoload": {
-		"psr-4": {
-			"Hofff\\Contao\\RecursiveDownloadFolder\\": "src/"
-		}
-	},
-	"extra" : {
-		"contao-manager-plugin": "Hofff\\Contao\\RecursiveDownloadFolder\\ContaoManager\\Plugin",
-		"branch-alias": {
-			"dev-master": "2.1.x-dev",
-			"dev-develop": "3.0.x-dev"
-		}
-	}
+  "name": "hofff/contao-recursive-download-folder",
+  "type": "contao-bundle",
+  "description": "Content element for Contao CMS to define a recursive download folder.",
+  "keywords": [
+    "download",
+    "downloads",
+    "folder",
+    "recursive"
+  ],
+  "homepage": "https://www.hofff.com",
+  "license": "LGPL-3.0-or-later",
+  "authors": [
+    {
+      "name": "Cliff Parnitzky",
+      "email": "cliff@hofff.com",
+      "homepage": "https://www.hofff.com",
+      "role": "Developer"
+    },
+    {
+      "name": "David Molineus",
+      "email": "david@hofff.com",
+      "homepage": "https://www.hofff.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.1",
+    "contao/core-bundle": "^4.4",
+    "symfony/config": "^3.3 || ^4.0",
+    "symfony/dependency-injection": "^3.3 || ^4.0",
+    "symfony/http-kernel": "^3.3 || ^4.0"
+  },
+  "conflict": {
+    "contao/manager-plugin": "<2.1 || >= 3.0"
+  },
+  "require-dev": {
+    "contao/manager-plugin": "^2.1"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "2.1.x-dev",
+      "dev-develop": "3.0.x-dev"
+    },
+    "contao-manager-plugin": "Hofff\\Contao\\RecursiveDownloadFolder\\ContaoManager\\Plugin"
+  },
+  "autoload": {
+    "psr-4": {
+      "Hofff\\Contao\\RecursiveDownloadFolder\\": "src/"
+    }
+  }
 }
