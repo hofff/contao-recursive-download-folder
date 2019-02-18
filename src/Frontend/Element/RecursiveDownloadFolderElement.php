@@ -200,7 +200,7 @@ class RecursiveDownloadFolderElement extends ContentElement
                     }
 
                     if ($fileMatches) {
-                        $strCssClass = 'file file-' . $arrFileData['extension'];
+                        $strCssClass = 'file file-' . $arrFileData['extension'] . ' ext-' . $arrFileData['extension'];
 
                         $files[$objFile->basename] = [
                             'type'      => $objElement->type,
@@ -256,7 +256,6 @@ class RecursiveDownloadFolderElement extends ContentElement
             'caption'   => $meta['caption'],
             'href'      => $strHref,
             'filesize'  => self::getReadableSize($objFile->filesize),
-            'icon'      => TL_ASSETS_URL . 'assets/contao/images/' . $objFile->icon,
             'mime'      => $objFile->mime,
             'meta'      => $meta,
             'extension' => $objFile->extension,

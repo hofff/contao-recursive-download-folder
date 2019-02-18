@@ -1,6 +1,6 @@
 <ul class="<?php echo $this->level; ?>"> 
 <?php foreach ($this->elements as $element): ?>
-  <?php if ($element['type'] == 'folder'): ?>
+  <?php if ($element['type'] === 'folder'): ?>
   <li class="<?php echo $element['css_class']; ?>">
   <?php if ($element['is_empty']) : ?>    
     <span title="<?php echo $element['data']['title']; ?>"><?php echo $element['data']['link']; ?></span>
@@ -9,7 +9,7 @@
   <?php endif; ?>    
   </li>
   <?php else: ?>
-  <li class="<?php echo $element['css_class']; ?>"><img src="<?php echo $element['data']['icon']; ?>" width="18" height="18" alt="" class="mime_icon"> <a href="<?php echo $element['data']['href']; ?>" title="<?php echo $element['data']['title']; ?>"><?php echo $element['data']['link']; ?> <span class="size">(<?php echo $element['data']['filesize']; ?>)</span></a></li>
+  <li class="<?php echo $element['css_class']; ?>"><a href="<?php echo $element['data']['href']; ?>" title="<?php echo $element['data']['title']; ?>"><?php echo $element['data']['link']; ?> <span class="size">(<?php echo $element['data']['filesize']; ?>)</span></a></li>
   <?php endif; ?>
 <?php endforeach; ?>
 </ul>
