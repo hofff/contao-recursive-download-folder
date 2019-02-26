@@ -10,9 +10,7 @@
 
 .ce_hofff_recursive-download-folder .folder-empty > span
 {
-	filter: alpha(opacity = 55); /* IE 6, 7, 8 */
-	-ms-filter: "alpha(opacity = 55)"; /* ab IE 8 zusätzlich möglich */
-	opacity: .55; /* alle anderen Browser einschließlich IE 9 */
+	opacity: .5;
 }
 
 .ce_hofff_recursive-download-folder .folder > ul
