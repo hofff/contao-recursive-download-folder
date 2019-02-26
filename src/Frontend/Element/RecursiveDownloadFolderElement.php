@@ -233,7 +233,9 @@ class RecursiveDownloadFolderElement extends ContentElement
         $meta = self::getMetaData($fileModel->meta, $GLOBALS['TL_LANGUAGE']);
 
         // Use the file name as title if none is given
-        $meta['title'] = ($meta['title'] ?? StringUtil::specialchars($objFile->basename));
+        if (!isset($meta['title']) || $meta['title'] == '') {
+            $meta['title'] = StringUtil::specialchars($objFile->basename);
+        }
 
         $strHref = Environment::get('request');
 
@@ -251,8 +253,8 @@ class RecursiveDownloadFolderElement extends ContentElement
             'id'        => $objFile->id,
             'uuid'      => $objFile->uuid,
             'name'      => $objFile->basename,
-            'title'     => $meta['title'],
-            'link'      => ($meta['link'] ?? $meta['title']),
+            'title'     => StringUtil::specialchars(sprintf($GLOBALS['TL_LANG']['MSC']['download'], $objFile->basename)),
+            'link'      => $meta['title'],
             'caption'   => $meta['caption'],
             'href'      => $strHref,
             'filesize'  => self::getReadableSize($objFile->filesize),
@@ -270,25 +272,20 @@ class RecursiveDownloadFolderElement extends ContentElement
      */
     private function getFolderData(FilesModel $objFolder) : array
     {
-        $arrMeta = self::getMetaData($objFolder->meta, $GLOBALS['TL_LANGUAGE']);
+        $meta = self::getMetaData($objFolder->meta, $GLOBALS['TL_LANGUAGE']);
 
         // Use the folder name as title if none is given
-        if ($arrMeta['title'] === '') {
-            $arrMeta['title'] = $objFolder->name;
-        }
-
-        // Use the title as link if none is given
-        if ($arrMeta['link'] === '') {
-            $arrMeta['link'] = $arrMeta['title'];
+        if (!isset($meta['title']) || $meta['title'] == '') {
+            $meta['title'] = StringUtil::specialchars($objFolder->name);
         }
 
         return [
             'id'    => $objFolder->id,
             'uuid'  => $objFolder->uuid,
             'name'  => $objFolder->name,
-            'title' => $arrMeta['title'],
-            'link'  => $arrMeta['link'],
-            'meta'  => $arrMeta,
+            'title' => $objFolder->name,
+            'link'  => $meta['title'],
+            'meta'  => $meta,
             'path'  => $objFolder->path,
         ];
     }
