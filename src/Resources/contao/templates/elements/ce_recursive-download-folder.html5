@@ -11,9 +11,13 @@ $GLOBALS['TL_JAVASCRIPT']['recursive-download-folder.js'] = 'bundles/hofffcontao
   <?php if ($this->searchable): ?>
     <form<?php if ($this->action): ?> action="<?php echo $this->action; ?>"<?php endif; ?> method="get">
       <div class="formbody">
-        <label for="ctrl_keywords_<?php echo $this->id; ?>" class="invisible"><?php echo $this->keywordLabel; ?></label>
-        <input type="search" name="keyword" id="ctrl_keyword_<?php echo $this->id; ?>" class="text" value="<?php echo $this->keyword; ?>">
-        <input type="submit" id="ctrl_submit_<?php echo $this->id; ?>" class="submit" value="<?php echo $this->searchLabel; ?>">
+          <div class="widget widget-text">
+              <label for="ctrl_keywords_<?php echo $this->id; ?>" class="invisible"><?php echo $this->keywordLabel; ?></label>
+              <input type="search" name="keyword" id="ctrl_keyword_<?php echo $this->id; ?>" class="text" value="<?php echo $this->keyword; ?>">
+          </div>
+          <div class="widget widget-submit">
+              <button type="submit" id="ctrl_submit_<?php echo $this->id; ?>" class="submit"><?= $this->searchLabel ?></button>
+          </div>
       </div>
     </form>
   <?php endif; ?>
