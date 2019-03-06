@@ -22,6 +22,10 @@ $GLOBALS['TL_JAVASCRIPT']['recursive-download-folder.js'] = 'bundles/hofffcontao
     </form>
   <?php endif; ?>
 
+  <?php if ($this->count > 0): ?>
   <?php echo $this->elements; ?>
+  <?php else: ?>
+  <p class="no-results"><?= $this->noResults ?></p>
+  <?php endif ?>
 
 </div>
