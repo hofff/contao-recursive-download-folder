@@ -269,6 +269,9 @@ class RecursiveDownloadFolderElement extends ContentElement
             'meta'      => $meta,
             'extension' => $objFile->extension,
             'path'      => $objFile->dirname,
+            'ctime'     => $objFile->ctime,
+            'mtime'     => $objFile->mtime,
+            'atime'     => $objFile->atime
         ];
     }
 
