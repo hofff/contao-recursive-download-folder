@@ -117,6 +117,7 @@ class RecursiveDownloadFolderElement extends ContentElement
         $this->Template->elements   = $fileTree['elements_rendered'];
         $this->Template->count      = count($elements);
         $this->Template->searchable = $this->recursiveDownloadFolderAllowFileSearch;
+
         if ($this->recursiveDownloadFolderAllowFileSearch) {
             $this->Template->action       = preg_replace('/&(amp;)?/i', '&amp;', Environment::get('indexFreeRequest'));
             $this->Template->keyword      = trim((string) Input::get('keyword'));
@@ -126,6 +127,10 @@ class RecursiveDownloadFolderElement extends ContentElement
             );
             $this->Template->searchLabel  = StringUtil::specialchars(
                 $GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderSearchLabel']
+            );
+            $this->Template->resetUrl     = $this->addToUrl('keyword=');
+            $this->Template->resetLabel   = StringUtil::specialchars(
+                $GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderResetLabel']
             );
         }
 
