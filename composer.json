@@ -24,11 +24,11 @@
       "role": "Developer"
     },
     {
-			"name": "Nicky Hoff",
-			"email": "nick@hofff.com",
-			"homepage": "https://www.hofff.com",
-			"role": "Manager"
-		}
+      "name": "Nicky Hoff",
+      "email": "nick@hofff.com",
+      "homepage": "https://www.hofff.com",
+      "role": "Manager"
+    }
   ],
   "require": {
     "php": ">=7.1",
