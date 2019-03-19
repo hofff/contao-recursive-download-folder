@@ -1,0 +1,24 @@
+.ce_hofff_recursive-download-folder .folder > a,
+.ce_hofff_recursive-download-folder .folder > span
+{
+	font-weight: bold;
+}
+.ce_hofff_recursive-download-folder .folder > a
+{
+	cursor: pointer;
+}
+
+.ce_hofff_recursive-download-folder .folder-empty > span
+{
+	opacity: .5;
+}
+
+.ce_hofff_recursive-download-folder .folder > ul
+{
+	display: none;
+}
+
+.ce_hofff_recursive-download-folder .folder-open > ul
+{
+	display: block;
+}

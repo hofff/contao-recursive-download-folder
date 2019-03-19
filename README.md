@@ -17,20 +17,13 @@ Provides a content element for Contao CMS to define a recursive download folder 
 
 ## Compatibility
 
-- min. Contao version: >= 3.2.0
-- max. Contao version: <  3.6.0
+- min. Contao version: >= 4.4.0
+- max. Contao version: <  5
 
 
 ## Installation
 
 Install the extension via composer: [hofff/contao-recursive-download-folder](https://packagist.org/packages/hofff/contao-recursive-download-folder).
-
-If you prefer to install it manually, download the latest release here: https://github.com/hofff/contao-recursive-download-folder/releases
-
-
-## Dependency
-
-There are no dependencies to other extensions, that have to be installed.
 
 
 ## Screenshots
