@@ -12,16 +12,22 @@
   "license": "LGPL-3.0-or-later",
   "authors": [
     {
+      "name": "David Molineus",
+      "email": "david@hofff.com",
+      "homepage": "https://www.hofff.com",
+      "role": "Developer"
+    },
+    {
       "name": "Cliff Parnitzky",
       "email": "cliff@hofff.com",
       "homepage": "https://www.hofff.com",
       "role": "Developer"
     },
     {
-      "name": "David Molineus",
-      "email": "david@hofff.com",
+      "name": "Nicky Hoff",
+      "email": "nick@hofff.com",
       "homepage": "https://www.hofff.com",
-      "role": "Developer"
+      "role": "Manager"
     }
   ],
   "require": {
