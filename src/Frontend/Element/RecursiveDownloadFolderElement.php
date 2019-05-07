@@ -46,7 +46,6 @@ class RecursiveDownloadFolderElement extends ContentElement
      */
     protected $strTemplate = 'ce_recursive-download-folder';
 
-
     /**
      * Return if there are no files
      */
@@ -95,21 +94,8 @@ class RecursiveDownloadFolderElement extends ContentElement
      */
     protected function compile() : void
     {
-        $treeBuilder = new ToggleableFileTreeBuilder();
-
-        if ($this->recursiveDownloadFolderAllowFileSearch) {
-            $treeBuilder->allowFileSearch();
-        }
-
-        if (!$this->recursiveDownloadFolderHideEmptyFolders) {
-            $treeBuilder->showEmptyFolders();
-        }
-
-        if ($this->recursiveDownloadFolderShowAllLevels) {
-            $treeBuilder->showAllLevels();
-        }
-
-        $fileTree = $treeBuilder->build(StringUtil::deserialize($this->folderSRC, true));
+        $treeBuilder = $this->createTreeBuilder();
+        $fileTree    = $treeBuilder->build(StringUtil::deserialize($this->folderSRC, true));
 
         if ($fileTree) {
             $fileTree = $fileTree[0];
@@ -133,7 +119,7 @@ class RecursiveDownloadFolderElement extends ContentElement
             $this->Template->searchLabel  = StringUtil::specialchars(
                 $GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderSearchLabel']
             );
-            $this->Template->resetUrl     = $this->addToUrl('keyword=');
+            $this->Template->resetUrl     = self::addToUrl('keyword=');
             $this->Template->resetLabel   = StringUtil::specialchars(
                 $GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderResetLabel']
             );
@@ -149,5 +135,27 @@ class RecursiveDownloadFolderElement extends ContentElement
 
         $GLOBALS['TL_JAVASCRIPT']['recursive-download-folder.js'] =
             'bundles/hofffcontaorecursivedownloadfolde/js/recursive-download-folder.min.js';
+    }
+
+    /**
+     * @return ToggleableFileTreeBuilder
+     */
+    protected function createTreeBuilder() : ToggleableFileTreeBuilder
+    {
+        $treeBuilder = new ToggleableFileTreeBuilder();
+
+        if ($this->recursiveDownloadFolderAllowFileSearch) {
+            $treeBuilder->allowFileSearch();
+        }
+
+        if ($this->recursiveDownloadFolderHideEmptyFolders) {
+            $treeBuilder->hideEmptyFolders();
+        }
+
+        if ($this->recursiveDownloadFolderShowAllLevels) {
+            $treeBuilder->showAllLevels();
+        }
+
+        return $treeBuilder;
     }
 }

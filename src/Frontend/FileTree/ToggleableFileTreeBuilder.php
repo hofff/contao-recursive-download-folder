@@ -30,15 +30,15 @@ final class ToggleableFileTreeBuilder
 {
     private $templateName = 'recursive-download-folder_default';
 
-    private $hideEmptyFolders = true;
+    private $hideEmptyFolders = false;
 
     private $showAllLevels = false;
 
     private $allowFileSearch = false;
 
-    public function showEmptyFolders() : self
+    public function hideEmptyFolders() : self
     {
-        $this->hideEmptyFolders = false;
+        $this->hideEmptyFolders = true;
 
         return $this;
     }
