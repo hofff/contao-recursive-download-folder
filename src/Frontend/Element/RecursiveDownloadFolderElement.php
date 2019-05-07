@@ -11,6 +11,8 @@ use Contao\FilesModel;
 use Contao\Input;
 use Contao\StringUtil;
 use Contao\Validator;
+use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\BreadcrumbFileTreeBuilder;
+use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\FileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\ToggleableFileTreeBuilder;
 use function basename;
 use function count;
@@ -19,6 +21,7 @@ use function preg_match;
 use function preg_replace;
 use function strpos;
 use function trim;
+use function urlencode;
 
 /**
  * Class ContentRecursiveDownloadFolder
@@ -29,6 +32,7 @@ use function trim;
  * @property mixed recursiveDownloadFolderAllowFileSearch
  * @property mixed recursiveDownloadFolderShowAllLevels
  * @property mixed recursiveDownloadFolderTpl
+ * @property mixed recursiveDownloadFolderMode
  */
 class RecursiveDownloadFolderElement extends ContentElement
 {
@@ -97,12 +101,24 @@ class RecursiveDownloadFolderElement extends ContentElement
         $treeBuilder = $this->createTreeBuilder();
         $fileTree    = $treeBuilder->build(StringUtil::deserialize($this->folderSRC, true));
 
-        if ($fileTree) {
-            $fileTree = $fileTree[0];
+        $this->Template->generateBreadcrumbLink = function (FilesModel $folder) : string {
+            $url = '';
 
-            $this->Template->fileTree = $fileTree;
-            $this->Template->elements = $fileTree['elements_rendered'];
-            $this->Template->count    = count($fileTree['elements']);
+            if (isset($GLOBALS['objPage'])) {
+                $url = $GLOBALS['objPage']->getFrontendUrl();
+            }
+
+            $url .= '?path=' . $folder->path;
+
+            return $url;
+        };
+
+        if ($fileTree['tree']) {
+            $this->Template->breadcrumb   = $fileTree['breadcrumb'];
+            $this->Template->activeFolder = end($fileTree['breadcrumb']);
+            $this->Template->fileTree     = $fileTree['tree'][0];
+            $this->Template->elements     = $fileTree['tree'][0]['elements_rendered'];
+            $this->Template->count        = count($fileTree['tree'][0]['elements']);
         } else {
             $this->Template->count = 0;
         }
@@ -137,12 +153,13 @@ class RecursiveDownloadFolderElement extends ContentElement
             'bundles/hofffcontaorecursivedownloadfolde/js/recursive-download-folder.min.js';
     }
 
-    /**
-     * @return ToggleableFileTreeBuilder
-     */
-    protected function createTreeBuilder() : ToggleableFileTreeBuilder
+    protected function createTreeBuilder() : FileTreeBuilder
     {
-        $treeBuilder = new ToggleableFileTreeBuilder();
+        if ($this->recursiveDownloadFolderMode === 'breadcrumb') {
+            $treeBuilder = new BreadcrumbFileTreeBuilder();
+        } else {
+            $treeBuilder = new ToggleableFileTreeBuilder();
+        }
 
         if ($this->recursiveDownloadFolderAllowFileSearch) {
             $treeBuilder->allowFileSearch();

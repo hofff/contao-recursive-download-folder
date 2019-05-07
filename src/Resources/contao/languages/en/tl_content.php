@@ -22,5 +22,14 @@ $GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderTpl']              = [
     'Template for recursive download folder',
     'Please select the template for the recursive download folder.',
 ];
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderMode']              = [
+    'Display mode',
+    'Please choose the mode how the recursive module should work.',
+];
 
 $GLOBALS['TL_LANG']['tl_content']['recursive-download-folder_legend'] = 'Recursive download folder settings';
+
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderModes']['breadcrumb'][0] = 'Folder navigation with breadcrumb';
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderModes']['breadcrumb'][1] = 'Folder navigation with breadcrumb.';
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderModes']['toggleable'][0] = 'Toggleable folder tree';
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderModes']['toggleable'][1] = 'All folders are toggleable without a page reload.';

@@ -5,7 +5,7 @@
   <?php if ($element['is_empty']) : ?>    
     <span title="<?php echo $element['data']['title']; ?>"><?php echo $element['data']['link']; ?></span>
   <?php else : ?>    
-    <a onclick="toggleFolder(this);" title="<?php echo $element['data']['title']; ?>"><?php echo $element['data']['link']; ?></a><?php echo $element['elements_rendered']; ?>
+    <a href="<?= $this->generateLink($element) ?>" title="<?php echo $element['data']['title']; ?>"><?php echo $element['data']['link']; ?></a><?php echo $element['elements_rendered']; ?>
   <?php endif; ?>    
   </li>
   <?php else: ?>

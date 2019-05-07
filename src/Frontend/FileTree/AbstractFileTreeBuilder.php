@@ -77,10 +77,91 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
             ];
         }
 
-        return $tree;
+        return [
+            'breadcrumb' => [],
+            'tree' => $tree
+        ];
     }
 
-    abstract protected function getElements(FilesModel $folder) : array;
+    protected function getElements(FilesModel $objParentFolder, int $level = 1) : array
+    {
+        $allowedDownload = array_map('trim', explode(',', strtolower($GLOBALS['TL_CONFIG']['allowedDownload'])));
+
+        $elements = [];
+        $folders  = [];
+        $files    = [];
+
+        $objElements = FilesModel::findByPid($objParentFolder->uuid);
+
+        if ($objElements === null) {
+            return $elements;
+        }
+
+        foreach ($objElements as $objElement) {
+            if ($objElement->type === 'folder') {
+                $count    = FilesModel::countByPid($objElement->uuid);
+                $elements = $this->getChildren($objElement, $level + 1);
+
+                if (($this->hideEmptyFolders && $count) || ! $this->hideEmptyFolders) {
+                    $strCssClass = 'folder';
+                    if ($this->showAllLevels) {
+                        $strCssClass .= ' folder-open';
+                    }
+                    if (!$count) {
+                        $strCssClass .= ' folder-empty';
+                    }
+
+                    $folders[$objElement->name] = [
+                        'type'              => $objElement->type,
+                        'data'              => $this->getFolderData($objElement),
+                        'elements'          => $elements,
+                        'elements_rendered' => $this->getElementsRendered($elements, $level + 1),
+                        'is_empty'          => $count == 0,
+                        'css_class'         => $strCssClass,
+                    ];
+                }
+            } else {
+                $objFile = new File($objElement->path);
+
+                if (in_array($objFile->extension, $allowedDownload, true) && ! preg_match(
+                        '/^meta(_[a-z]{2})?\.txt$/',
+                        $objFile->basename
+                    )) {
+                    $arrFileData = $this->getFileData($objFile, $objElement);
+                    $fileMatches = true;
+
+                    if ($this->allowFileSearch && ! empty(trim((string) Input::get('keyword')))) {
+                        $visibleFileName = $arrFileData['name'];
+                        if (! empty($arrFileData['link'])) {
+                            $visibleFileName = $arrFileData['link'];
+                        }
+                        // use exact, case insensitive string search
+                        $fileMatches = (stripos($visibleFileName, trim(Input::get('keyword'))) !== false);
+                    }
+
+                    if ($fileMatches) {
+                        $strCssClass = 'file file-' . $arrFileData['extension'] . ' ext-' . $arrFileData['extension'];
+
+                        $files[$objFile->basename] = [
+                            'type'      => $objElement->type,
+                            'data'      => $arrFileData,
+                            'css_class' => $strCssClass,
+                        ];
+                    }
+                }
+            }
+        }
+
+        // sort the folders and files alphabetically by their name
+        ksort($folders);
+        ksort($files);
+
+        // merge folders and files into one array (foders at first, files afterwards)
+        $elements = array_values($folders);
+        $elements = array_merge($elements, array_values($files));
+
+        return $elements;
+    }
 
     /**
      * Get all data for a file
@@ -164,9 +245,16 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
             [
                 'level'    => 'level_' . $level,
                 'elements' => $elements,
+                'generateLink' => function (array $element) : string {
+                    return $this->generateLink($element);
+                }
             ]
         );
 
         return $template->parse();
     }
+
+    abstract protected function getChildren(FilesModel $objElement, int $level) : array;
+
+    abstract protected function generateLink(array $element) : string;
 }

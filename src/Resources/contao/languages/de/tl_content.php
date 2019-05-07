@@ -22,5 +22,14 @@ $GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderTpl']              = [
     'Template für den rekursiven Download Ordner',
     'Bitte wählen Sie das Template für den rekursiven Download Ordner aus.',
 ];
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderMode']              = [
+    'Darstellungsmodus',
+    'Wählen Sie den Darstellungsmodus für die Ordnerstruktur.',
+];
 
 $GLOBALS['TL_LANG']['tl_content']['recursive-download-folder_legend'] = 'Rekursiver Download Ordner - Einstellungen';
+
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderModes']['breadcrumb'][0] = 'Ordnerbasiert mit Pfadnavigation';
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderModes']['breadcrumb'][1] = '';
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderModes']['toggleable'][0] = 'Aufklappbarer Ordnerbaum';
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderModes']['toggleable'][1] = '';
