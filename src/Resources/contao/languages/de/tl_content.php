@@ -26,6 +26,10 @@ $GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderMode']              = 
     'Darstellungsmodus',
     'Wählen Sie den Darstellungsmodus für die Ordnerstruktur.',
 ];
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderVisibleRoot']              = [
+    'Zeige Quellordner',
+    'Erzwinge die Darstellung des Quellordners (wird automatisch angezeigt, wenn mehrere Quellordner ausgewählt wurden).',
+];
 
 $GLOBALS['TL_LANG']['tl_content']['recursive-download-folder_legend'] = 'Rekursiver Download Ordner - Einstellungen';
 

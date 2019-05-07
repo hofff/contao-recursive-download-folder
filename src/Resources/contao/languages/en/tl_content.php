@@ -26,6 +26,10 @@ $GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderMode']              = 
     'Display mode',
     'Please choose the mode how the recursive module should work.',
 ];
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderVisibleRoot']              = [
+    'Render root folder',
+    'Force rendering of root folder (Always rendered if more than one folder is selected).',
+];
 
 $GLOBALS['TL_LANG']['tl_content']['recursive-download-folder_legend'] = 'Recursive download folder settings';
 

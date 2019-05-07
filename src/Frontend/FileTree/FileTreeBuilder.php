@@ -13,5 +13,7 @@ interface FileTreeBuilder
 
     public function allowFileSearch() : self;
 
+    public function alwaysShowRoot() : self;
+
     public function build(array $uuids) : array;
 }

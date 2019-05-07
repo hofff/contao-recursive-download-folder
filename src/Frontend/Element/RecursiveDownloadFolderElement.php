@@ -10,18 +10,14 @@ use Contao\Environment;
 use Contao\FilesModel;
 use Contao\Input;
 use Contao\StringUtil;
-use Contao\Validator;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\BreadcrumbFileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\FileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\ToggleableFileTreeBuilder;
-use function basename;
 use function count;
 use function dirname;
-use function preg_match;
 use function preg_replace;
 use function strpos;
 use function trim;
-use function urlencode;
 
 /**
  * Class ContentRecursiveDownloadFolder
@@ -33,6 +29,7 @@ use function urlencode;
  * @property mixed recursiveDownloadFolderShowAllLevels
  * @property mixed recursiveDownloadFolderTpl
  * @property mixed recursiveDownloadFolderMode
+ * @property mixed recursiveDownloadFolderVisibleRoot
  */
 class RecursiveDownloadFolderElement extends ContentElement
 {
@@ -50,6 +47,13 @@ class RecursiveDownloadFolderElement extends ContentElement
      */
     protected $strTemplate = 'ce_recursive-download-folder';
 
+    public function __construct($objElement, $strColumn = 'main')
+    {
+        parent::__construct($objElement, $strColumn);
+
+        $this->folderSRC = StringUtil::deserialize($this->folderSRC, true);
+    }
+
     /**
      * Return if there are no files
      */
@@ -60,7 +64,7 @@ class RecursiveDownloadFolderElement extends ContentElement
             $this->import('FrontendUser', 'User');
 
             if ($this->User->assignDir && $this->User->homeDir) {
-                $this->folderSRC = $this->User->homeDir;
+                $this->folderSRC = [$this->User->homeDir];
             }
         }
 
@@ -70,22 +74,20 @@ class RecursiveDownloadFolderElement extends ContentElement
         }
 
         // Get the folders from the database
-        $this->objFolder = FilesModel::findByUuid($this->folderSRC);
+        $this->objFolder = FilesModel::findMultipleByUuids($this->folderSRC);
 
         if ($this->objFolder === null) {
-            if (! Validator::isUuid($this->folderSRC[0])) {
-                return '<p class="error">' . $GLOBALS['TL_LANG']['ERR']['version2format'] . '</p>';
-            }
-
             return '';
         }
 
         $file = Input::get('file', true);
 
         // Send the file to the browser and do not send a 404 header (see #4632)
-        if ($file !== '' && $file !== null && ! preg_match('/^meta(_[a-z]{2})?\.txt$/', basename($file))) {
-            if (strpos(dirname($file), $this->objFolder->path) !== false) {
-                Controller::sendFileToBrowser($file);
+        if ($file !== '' && $file !== null) {
+            foreach ($this->objFolder as $folder) {
+                if (strpos(dirname($file), $folder->path) === 0) {
+                    Controller::sendFileToBrowser($file);
+                }
             }
         }
 
@@ -99,26 +101,27 @@ class RecursiveDownloadFolderElement extends ContentElement
     protected function compile() : void
     {
         $treeBuilder = $this->createTreeBuilder();
-        $fileTree    = $treeBuilder->build(StringUtil::deserialize($this->folderSRC, true));
+        $fileTree    = $treeBuilder->build($this->folderSRC);
 
-        $this->Template->generateBreadcrumbLink = function (FilesModel $folder) : string {
+        $this->Template->generateBreadcrumbLink = function (string $path) : string {
             $url = '';
 
             if (isset($GLOBALS['objPage'])) {
                 $url = $GLOBALS['objPage']->getFrontendUrl();
             }
 
-            $url .= '?path=' . $folder->path;
+            $url .= '?path=' . $path;
 
             return $url;
         };
 
         if ($fileTree['tree']) {
-            $this->Template->breadcrumb   = $fileTree['breadcrumb'];
-            $this->Template->activeFolder = end($fileTree['breadcrumb']);
-            $this->Template->fileTree     = $fileTree['tree'][0];
-            $this->Template->elements     = $fileTree['tree'][0]['elements_rendered'];
-            $this->Template->count        = count($fileTree['tree'][0]['elements']);
+            $this->Template->breadcrumb    = $fileTree['breadcrumb'];
+            $this->Template->showRootLevel = $this->recursiveDownloadFolderVisibleRoot || count($this->folderSRC) > 1 ;
+            $this->Template->activeFolder  = end($fileTree['breadcrumb']);
+            $this->Template->fileTree      = $fileTree['tree'];
+            $this->Template->elements      = $fileTree['tree']['elements_rendered'];
+            $this->Template->count         = count($fileTree['tree']['elements']);
         } else {
             $this->Template->count = 0;
         }
@@ -171,6 +174,10 @@ class RecursiveDownloadFolderElement extends ContentElement
 
         if ($this->recursiveDownloadFolderShowAllLevels) {
             $treeBuilder->showAllLevels();
+        }
+
+        if ($this->recursiveDownloadFolderVisibleRoot) {
+            $treeBuilder->alwaysShowRoot();
         }
 
         return $treeBuilder;

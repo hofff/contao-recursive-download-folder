@@ -36,6 +36,8 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
 
     protected $allowFileSearch = false;
 
+    protected $alwaysShowRoot = false;
+
     public function hideEmptyFolders() : FileTreeBuilder
     {
         $this->hideEmptyFolders = true;
@@ -53,6 +55,13 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
     public function allowFileSearch() : FileTreeBuilder
     {
         $this->allowFileSearch = true;
+
+        return $this;
+    }
+
+    public function alwaysShowRoot(): FileTreeBuilder
+    {
+        $this->alwaysShowRoot = true;
 
         return $this;
     }
@@ -75,6 +84,19 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
                 'elements'          => $elements,
                 'elements_rendered' => $this->getElementsRendered($elements),
             ];
+        }
+
+        if (count($tree) > 1 || $this->alwaysShowRoot) {
+            $tree = [
+                'type' => 'folder',
+                'data' => [
+                    'name' => '/'
+                ],
+                'elements' => $tree,
+                'elements_rendered' => $this->getElementsRendered($tree),
+            ];
+        } else {
+            $tree = $tree[0];
         }
 
         return [

@@ -8,7 +8,7 @@ $GLOBALS['TL_DCA']['tl_content']['palettes']['hofff_recursive-download-folder']
     = '{type_legend},type,headline'
     . ';{source_legend},folderSRC,useHomeDir'
     . ';{recursive-download-folder_legend},recursiveDownloadFolderMode,recursiveDownloadFolderHideEmptyFolders'
-    . ',recursiveDownloadFolderShowAllLevels,recursiveDownloadFolderAllowFileSearch'
+    . ',recursiveDownloadFolderShowAllLevels,recursiveDownloadFolderAllowFileSearch,recursiveDownloadFolderVisibleRoot'
     . ';{template_legend:hide},recursiveDownloadFolderTpl,customTpl'
     . ';{protected_legend:hide},protected'
     . ';{expert_legend:hide},guests,cssID,space'
@@ -18,8 +18,8 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['folderSRC'] = [
     'label'     => &$GLOBALS['TL_LANG']['tl_content']['folderSRC'],
     'exclude'   => true,
     'inputType' => 'fileTree',
-    'eval'      => ['fieldType' => 'radio', 'mandatory' => true, 'tl_class' => 'clr'],
-    'sql'       => 'binary(16) NULL',
+    'eval'      => ['fieldType' => 'checkbox', 'multiple' => true, 'mandatory' => true, 'tl_class' => 'clr'],
+    'sql'       => 'blob NULL',
 ];
 
 $GLOBALS['TL_DCA']['tl_content']['fields']['recursiveDownloadFolderMode'] = [
@@ -64,4 +64,12 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['recursiveDownloadFolderTpl'] = [
     'options'   => Controller::getTemplateGroup('recursive-download-folder_'),
     'eval'      => ['tl_class' => 'w50'],
     'sql'       => "varchar(64) NOT NULL default ''",
+];
+
+$GLOBALS['TL_DCA']['tl_content']['fields']['recursiveDownloadFolderVisibleRoot'] = [
+    'label'     => &$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderVisibleRoot'],
+    'exclude'   => true,
+    'inputType' => 'checkbox',
+    'eval'      => ['tl_class' => 'w50'],
+    'sql'       => "char(1) NOT NULL default ''",
 ];

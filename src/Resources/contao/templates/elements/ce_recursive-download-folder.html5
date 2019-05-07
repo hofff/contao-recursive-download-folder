@@ -26,18 +26,21 @@ $GLOBALS['TL_JAVASCRIPT']['recursive-download-folder.js'] = 'bundles/hofffcontao
   <?php endif; ?>
 
   <?php if ($this->count > 0): ?>
-  <?php if ($this->breadcrumb): ?>
-      <ul class="rdlf-breadcrumb">
-      <?php foreach ($this->breadcrumb as $folder): ?>
-        <?php if ($folder === $this->activeFolder): ?>
-          <li class="rdlf-breadcrumb-item active"><strong><?= $folder->name ?></strong></li>
-        <?php else: ?>
-          <li class="rdlf-breadcrumb-item"><a href="<?= $this->generateBreadcrumbLink($folder) ?>"><?= $folder->name ?></a></li>
-        <?php endif ?>
-      <?php endforeach ?>
-      </ul>
-  <?php endif ?>
-  <?php echo $this->elements; ?>
+      <?php if ($this->breadcrumb): ?>
+          <ul class="rdlf-breadcrumb">
+          <?php if ($this->showRootLevel): ?>
+              <li class="rdlf-breadcrumb-item"><a href="<?= $this->generateBreadcrumbLink('/') ?>">/</a></li>
+          <?php endif ?>
+          <?php foreach ($this->breadcrumb as $folder): ?>
+            <?php if ($folder === $this->activeFolder): ?>
+              <li class="rdlf-breadcrumb-item active"><strong><?= $folder->name ?></strong></li>
+            <?php else: ?>
+              <li class="rdlf-breadcrumb-item"><a href="<?= $this->generateBreadcrumbLink($folder->path) ?>"><?= $folder->name ?></a></li>
+            <?php endif ?>
+          <?php endforeach ?>
+          </ul>
+      <?php endif ?>
+      <?php echo $this->elements; ?>
   <?php else: ?>
   <p class="no-results"><?= $this->noResults ?></p>
   <?php endif ?>
