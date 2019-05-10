@@ -16,5 +16,10 @@ interface FileTreeBuilder
 
     public function ignoreAllowedDownloads() : self;
 
+    /**
+     * @param mixed[] $uuids
+     *
+     * @return mixed[]
+     */
     public function build(array $uuids) : array;
 }

@@ -15,6 +15,7 @@ use Contao\System;
 use function array_map;
 use function array_merge;
 use function array_values;
+use function count;
 use function explode;
 use function in_array;
 use function ksort;
@@ -26,18 +27,24 @@ use function strpos;
 use function strtolower;
 use function trim;
 
-abstract class AbstractFileTreeBuilder implements FileTreeBuilder
+abstract class BaseFileTreeBuilder implements FileTreeBuilder
 {
+    /** @var string */
     protected $templateName = 'recursive-download-folder_default';
 
+    /** @var bool */
     protected $hideEmptyFolders = false;
 
+    /** @var bool */
     protected $showAllLevels = false;
 
+    /** @var bool */
     protected $allowFileSearch = false;
 
+    /** @var bool */
     protected $alwaysShowRoot = false;
 
+    /** @var bool */
     protected $ignoreAllowedDownloads = false;
 
     public function hideEmptyFolders() : FileTreeBuilder
@@ -61,33 +68,33 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
         return $this;
     }
 
-    public function alwaysShowRoot(): FileTreeBuilder
+    public function alwaysShowRoot() : FileTreeBuilder
     {
         $this->alwaysShowRoot = true;
 
         return $this;
     }
 
-    public function ignoreAllowedDownloads(): FileTreeBuilder
+    public function ignoreAllowedDownloads() : FileTreeBuilder
     {
         $this->ignoreAllowedDownloads = true;
 
         return $this;
     }
 
+    /** @inheritDoc */
     public function build(array $uuids) : array
     {
         $folders = FilesModel::findMultipleByUuids($uuids);
         if ($folders === null) {
             return [];
-
         }
 
         $tree = [];
 
         foreach ($folders as $folder) {
             $elements = $this->getElements($folder);
-            $tree[] = [
+            $tree[]   = [
                 'type'              => $folder->type,
                 'data'              => $this->getFolderData($folder),
                 'elements'          => $elements,
@@ -98,9 +105,7 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
         if (count($tree) > 1 || $this->alwaysShowRoot) {
             $tree = [
                 'type' => 'folder',
-                'data' => [
-                    'name' => '/'
-                ],
+                'data' => ['name' => '/'],
                 'elements' => $tree,
                 'elements_rendered' => $this->getElementsRendered($tree),
             ];
@@ -110,10 +115,13 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
 
         return [
             'breadcrumb' => [],
-            'tree' => $tree
+            'tree' => $tree,
         ];
     }
 
+    /**
+     * @return mixed[][]
+     */
     protected function getElements(FilesModel $objParentFolder, int $level = 1) : array
     {
         $elements = [];
@@ -136,7 +144,7 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
                     if ($this->showAllLevels) {
                         $strCssClass .= ' folder-open';
                     }
-                    if (!$count) {
+                    if (! $count) {
                         $strCssClass .= ' folder-empty';
                     }
 
@@ -145,7 +153,7 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
                         'data'              => $this->getFolderData($objElement),
                         'elements'          => $elements,
                         'elements_rendered' => $this->getElementsRendered($elements, $level + 1),
-                        'is_empty'          => $count == 0,
+                        'is_empty'          => $count === 0,
                         'css_class'         => $strCssClass,
                     ];
                 }
@@ -153,9 +161,9 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
                 $objFile = new File($objElement->path);
 
                 if ($this->isAllowed($objFile->extension) && ! preg_match(
-                        '/^meta(_[a-z]{2})?\.txt$/',
-                        $objFile->basename
-                    )) {
+                    '/^meta(_[a-z]{2})?\.txt$/',
+                    $objFile->basename
+                )) {
                     $arrFileData = $this->getFileData($objFile, $objElement);
                     $fileMatches = true;
 
@@ -202,7 +210,7 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
         $meta = Frontend::getMetaData($fileModel->meta, $GLOBALS['TL_LANGUAGE']);
 
         // Use the file name as title if none is given
-        if (!isset($meta['title']) || $meta['title'] == '') {
+        if (! isset($meta['title']) || $meta['title'] === '') {
             $meta['title'] = StringUtil::specialchars($objFile->basename);
         }
 
@@ -214,15 +222,17 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
         }
 
         $strHref .= ($GLOBALS['TL_CONFIG']['disableAlias'] || strpos(
-                $strHref,
-                '?'
-            ) !== false ? '&amp;' : '?') . 'file=' . System::urlEncode($fileModel->path);
+            $strHref,
+            '?'
+        ) !== false ? '&amp;' : '?') . 'file=' . System::urlEncode($fileModel->path);
 
         return [
             'id'        => $objFile->id,
             'uuid'      => $objFile->uuid,
             'name'      => $objFile->basename,
-            'title'     => StringUtil::specialchars(sprintf($GLOBALS['TL_LANG']['MSC']['download'], $objFile->basename)),
+            'title'     => StringUtil::specialchars(
+                sprintf($GLOBALS['TL_LANG']['MSC']['download'], $objFile->basename)
+            ),
             'link'      => $meta['title'],
             'caption'   => $meta['caption'],
             'href'      => $strHref,
@@ -233,7 +243,7 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
             'path'      => $objFile->dirname,
             'ctime'     => $objFile->ctime,
             'mtime'     => $objFile->mtime,
-            'atime'     => $objFile->atime
+            'atime'     => $objFile->atime,
         ];
     }
 
@@ -247,7 +257,7 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
         $meta = Frontend::getMetaData($objFolder->meta, $GLOBALS['TL_LANGUAGE']);
 
         // Use the folder name as title if none is given
-        if (!isset($meta['title']) || $meta['title'] == '') {
+        if (! isset($meta['title']) || $meta['title'] === '') {
             $meta['title'] = StringUtil::specialchars($objFolder->name);
         }
 
@@ -276,7 +286,7 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
                 'elements' => $elements,
                 'generateLink' => function (array $element) : string {
                     return $this->generateLink($element);
-                }
+                },
             ]
         );
 
@@ -298,7 +308,9 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
         return in_array($extension, $allowedDownloads, true);
     }
 
+    /** @return mixed[][] */
     abstract protected function getChildren(FilesModel $objElement, int $level) : array;
 
+    /** @param mixed[] $element */
     abstract protected function generateLink(array $element) : string;
 }

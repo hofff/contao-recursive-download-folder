@@ -4,19 +4,25 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\RecursiveDownloadFolder\Frontend;
 
+use Config;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
+use Contao\Database\Result;
 use Contao\Environment;
 use Contao\File;
 use Contao\FilesModel;
 use Contao\Input;
+use Contao\Model;
 use Contao\StringUtil;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\BreadcrumbFileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\FileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\ToggleableFileTreeBuilder;
+use function count;
 use function dirname;
 use function end;
 use function file_exists;
+use function in_array;
+use function is_array;
 use function preg_match;
 use function preg_quote;
 use function preg_replace;
@@ -34,6 +40,10 @@ trait RecursiveDownloadFolderTrait
      */
     protected $objFolder;
 
+    /**
+     * @param Model|Result $objElement
+     * @param string       $strColumn
+     */
     public function __construct($objElement, $strColumn = 'main')
     {
         parent::__construct($objElement, $strColumn);
@@ -72,9 +82,11 @@ trait RecursiveDownloadFolderTrait
         // Send the file to the browser and do not send a 404 header (see #4632)
         if ($file !== '' && $file !== null) {
             foreach ($this->objFolder as $folder) {
-                if (strpos(dirname($file), $folder->path) === 0) {
-                    $this->sendFile($file);
+                if (strpos(dirname($file), $folder->path) !== 0) {
+                    continue;
                 }
+
+                $this->sendFile($file);
             }
         }
 
@@ -90,7 +102,7 @@ trait RecursiveDownloadFolderTrait
         $treeBuilder = $this->createTreeBuilder();
         $fileTree    = $treeBuilder->build($this->folderSRC);
 
-        $this->Template->generateBreadcrumbLink = function (string $path) : string {
+        $this->Template->generateBreadcrumbLink = static function (string $path) : string {
             $url = '';
 
             if (isset($GLOBALS['objPage'])) {
@@ -104,7 +116,7 @@ trait RecursiveDownloadFolderTrait
 
         if ($fileTree['tree']) {
             $this->Template->breadcrumb    = $fileTree['breadcrumb'];
-            $this->Template->showRootLevel = $this->recursiveDownloadFolderVisibleRoot || count($this->folderSRC) > 1 ;
+            $this->Template->showRootLevel = $this->recursiveDownloadFolderVisibleRoot || count($this->folderSRC) > 1;
             $this->Template->activeFolder  = end($fileTree['breadcrumb']);
             $this->Template->fileTree      = $fileTree['tree'];
             $this->Template->elements      = $fileTree['tree']['elements_rendered'];
@@ -181,40 +193,34 @@ trait RecursiveDownloadFolderTrait
      *
      * @throws AccessDeniedException
      */
-    protected function sendFile($strFile)
+    protected function sendFile(string $strFile) : void
     {
         // Make sure there are no attempts to hack the file system
-        if (preg_match('@^\.+@', $strFile) || preg_match('@\.+/@', $strFile) || preg_match('@(://)+@', $strFile))
-        {
+        if (preg_match('@^\.+@', $strFile) || preg_match('@\.+/@', $strFile) || preg_match('@(://)+@', $strFile)) {
             throw new PageNotFoundException('Invalid file name');
         }
 
         // Limit downloads to the files directory
-        if (!preg_match('@^' . preg_quote(\Config::get('uploadPath'), '@') . '@i', $strFile))
-        {
+        if (! preg_match('@^' . preg_quote(Config::get('uploadPath'), '@') . '@i', $strFile)) {
             throw new PageNotFoundException('Invalid path');
         }
 
         // Check whether the file exists
-        if (!file_exists(TL_ROOT . '/' . $strFile))
-        {
+        if (! file_exists(TL_ROOT . '/' . $strFile)) {
             throw new PageNotFoundException('File not found');
         }
 
-        $objFile = new File($strFile);
-        $arrAllowedTypes = \StringUtil::trimsplit(',', strtolower(\Config::get('allowedDownload')));
+        $objFile         = new File($strFile);
+        $arrAllowedTypes = \StringUtil::trimsplit(',', strtolower(Config::get('allowedDownload')));
 
         // Check whether the file type is allowed to be downloaded
-        if (!$this->recursiveDownloadFolderAllowAll && !\in_array($objFile->extension, $arrAllowedTypes))
-        {
+        if (! $this->recursiveDownloadFolderAllowAll && ! in_array($objFile->extension, $arrAllowedTypes)) {
             throw new AccessDeniedException(sprintf('File type "%s" is not allowed', $objFile->extension));
         }
 
         // HOOK: post download callback
-        if (isset($GLOBALS['TL_HOOKS']['postDownload']) && \is_array($GLOBALS['TL_HOOKS']['postDownload']))
-        {
-            foreach ($GLOBALS['TL_HOOKS']['postDownload'] as $callback)
-            {
+        if (isset($GLOBALS['TL_HOOKS']['postDownload']) && is_array($GLOBALS['TL_HOOKS']['postDownload'])) {
+            foreach ($GLOBALS['TL_HOOKS']['postDownload'] as $callback) {
                 static::importStatic($callback[0])->{$callback[1]}($strFile);
             }
         }

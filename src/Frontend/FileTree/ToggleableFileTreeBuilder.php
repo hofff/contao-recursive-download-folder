@@ -6,14 +6,16 @@ namespace Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree;
 
 use Contao\FilesModel;
 
-final class ToggleableFileTreeBuilder extends AbstractFileTreeBuilder
+final class ToggleableFileTreeBuilder extends BaseFileTreeBuilder
 {
-    protected function getChildren(FilesModel $objElement, int $level): array
+    /** @inheritDoc */
+    protected function getChildren(FilesModel $objElement, int $level) : array
     {
         return $this->getElements($objElement, $level);
     }
 
-    protected function generateLink(array $element): string
+    /** @inheritDoc */
+    protected function generateLink(array $element) : string
     {
         return '#';
     }

@@ -22,15 +22,15 @@ $GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderTpl']              = [
     'Template for recursive download folder',
     'Please select the template for the recursive download folder.',
 ];
-$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderMode']              = [
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderMode']             = [
     'Display mode',
     'Please choose the mode how the recursive module should work.',
 ];
-$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderVisibleRoot']              = [
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderVisibleRoot']      = [
     'Render root folder',
     'Force rendering of root folder (Always rendered if more than one folder is selected).',
 ];
-$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderAllowAll']              = [
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderAllowAll']         = [
     'Ignore setting allowed downloads',
     'List all files no matter if they are defined in the ignore download setting',
 ];

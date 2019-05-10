@@ -11,11 +11,13 @@ use function end;
 use function in_array;
 use function urldecode;
 
-final class BreadcrumbFileTreeBuilder extends AbstractFileTreeBuilder
+final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
 {
+    /** @var FilesModel[] */
     private $breadcrumb = [];
 
-    public function build(array $uuids): array
+    /** @inheritDoc */
+    public function build(array $uuids) : array
     {
         $this->buildBreadcrumb($uuids);
 
@@ -25,12 +27,14 @@ final class BreadcrumbFileTreeBuilder extends AbstractFileTreeBuilder
         return $data;
     }
 
-    protected function getChildren(FilesModel $objElement, int $level): array
+    /** @inheritDoc */
+    protected function getChildren(FilesModel $objElement, int $level) : array
     {
         return [];
     }
 
-    protected function generateLink(array $element): string
+    /** @inheritDoc */
+    protected function generateLink(array $element) : string
     {
         $url = '';
 
@@ -43,12 +47,13 @@ final class BreadcrumbFileTreeBuilder extends AbstractFileTreeBuilder
         return $url;
     }
 
+    /** @param string[] $rootIds */
     private function buildBreadcrumb(array &$rootIds) : void
     {
         $this->breadcrumb = [];
 
         $path = Input::get('path');
-        if (!$path) {
+        if (! $path) {
             return;
         }
 
@@ -68,7 +73,7 @@ final class BreadcrumbFileTreeBuilder extends AbstractFileTreeBuilder
         }
 
         // Breadcrumb is in defined root folders.
-        if (!$safe) {
+        if (! $safe) {
             $this->breadcrumb = [];
         } elseif ($this->breadcrumb) {
             $last    = end($this->breadcrumb);
