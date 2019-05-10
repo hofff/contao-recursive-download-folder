@@ -9,6 +9,7 @@ $GLOBALS['TL_DCA']['tl_module']['palettes']['hofff_recursive-download-folder']
     . ';{source_legend},folderSRC,useHomeDir'
     . ';{recursive-download-folder_legend},recursiveDownloadFolderMode,recursiveDownloadFolderHideEmptyFolders'
     . ',recursiveDownloadFolderShowAllLevels,recursiveDownloadFolderAllowFileSearch,recursiveDownloadFolderVisibleRoot'
+    . ',recursiveDownloadFolderAllowAll'
     . ';{template_legend:hide},recursiveDownloadFolderTpl,customTpl'
     . ';{protected_legend:hide},protected'
     . ';{expert_legend:hide},guests,cssID,space'
@@ -68,6 +69,14 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['recursiveDownloadFolderTpl'] = [
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['recursiveDownloadFolderVisibleRoot'] = [
     'label'     => &$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderVisibleRoot'],
+    'exclude'   => true,
+    'inputType' => 'checkbox',
+    'eval'      => ['tl_class' => 'w50'],
+    'sql'       => "char(1) NOT NULL default ''",
+];
+
+$GLOBALS['TL_DCA']['tl_module']['fields']['recursiveDownloadFolderAllowAll'] = [
+    'label'     => &$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderAllowAll'],
     'exclude'   => true,
     'inputType' => 'checkbox',
     'eval'      => ['tl_class' => 'w50'],

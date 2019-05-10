@@ -4,19 +4,25 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\RecursiveDownloadFolder\Frontend;
 
-use Contao\Controller;
+use Contao\CoreBundle\Exception\AccessDeniedException;
+use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\Environment;
+use Contao\File;
 use Contao\FilesModel;
 use Contao\Input;
 use Contao\StringUtil;
-use function dirname;
-use function end;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\BreadcrumbFileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\FileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\ToggleableFileTreeBuilder;
+use function dirname;
+use function end;
+use function file_exists;
+use function preg_match;
+use function preg_quote;
 use function preg_replace;
 use function sprintf;
 use function strpos;
+use function strtolower;
 use function trim;
 
 trait RecursiveDownloadFolderTrait
@@ -67,7 +73,7 @@ trait RecursiveDownloadFolderTrait
         if ($file !== '' && $file !== null) {
             foreach ($this->objFolder as $folder) {
                 if (strpos(dirname($file), $folder->path) === 0) {
-                    Controller::sendFileToBrowser($file);
+                    $this->sendFile($file);
                 }
             }
         }
@@ -161,6 +167,59 @@ trait RecursiveDownloadFolderTrait
             $treeBuilder->alwaysShowRoot();
         }
 
+        if ($this->recursiveDownloadFolderAllowAll) {
+            $treeBuilder->ignoreAllowedDownloads();
+        }
+
         return $treeBuilder;
+    }
+
+    /**
+     * Send a file to the browser so the "save as …" dialogue opens
+     *
+     * @param string $strFile The file path
+     *
+     * @throws AccessDeniedException
+     */
+    protected function sendFile($strFile)
+    {
+        // Make sure there are no attempts to hack the file system
+        if (preg_match('@^\.+@', $strFile) || preg_match('@\.+/@', $strFile) || preg_match('@(://)+@', $strFile))
+        {
+            throw new PageNotFoundException('Invalid file name');
+        }
+
+        // Limit downloads to the files directory
+        if (!preg_match('@^' . preg_quote(\Config::get('uploadPath'), '@') . '@i', $strFile))
+        {
+            throw new PageNotFoundException('Invalid path');
+        }
+
+        // Check whether the file exists
+        if (!file_exists(TL_ROOT . '/' . $strFile))
+        {
+            throw new PageNotFoundException('File not found');
+        }
+
+        $objFile = new File($strFile);
+        $arrAllowedTypes = \StringUtil::trimsplit(',', strtolower(\Config::get('allowedDownload')));
+
+        // Check whether the file type is allowed to be downloaded
+        if (!$this->recursiveDownloadFolderAllowAll && !\in_array($objFile->extension, $arrAllowedTypes))
+        {
+            throw new AccessDeniedException(sprintf('File type "%s" is not allowed', $objFile->extension));
+        }
+
+        // HOOK: post download callback
+        if (isset($GLOBALS['TL_HOOKS']['postDownload']) && \is_array($GLOBALS['TL_HOOKS']['postDownload']))
+        {
+            foreach ($GLOBALS['TL_HOOKS']['postDownload'] as $callback)
+            {
+                static::importStatic($callback[0])->{$callback[1]}($strFile);
+            }
+        }
+
+        // Send the file (will stop the script execution)
+        $objFile->sendToBrowser();
     }
 }

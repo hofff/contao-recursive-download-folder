@@ -38,6 +38,8 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
 
     protected $alwaysShowRoot = false;
 
+    protected $ignoreAllowedDownloads = false;
+
     public function hideEmptyFolders() : FileTreeBuilder
     {
         $this->hideEmptyFolders = true;
@@ -62,6 +64,13 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
     public function alwaysShowRoot(): FileTreeBuilder
     {
         $this->alwaysShowRoot = true;
+
+        return $this;
+    }
+
+    public function ignoreAllowedDownloads(): FileTreeBuilder
+    {
+        $this->ignoreAllowedDownloads = true;
 
         return $this;
     }
@@ -107,8 +116,6 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
 
     protected function getElements(FilesModel $objParentFolder, int $level = 1) : array
     {
-        $allowedDownload = array_map('trim', explode(',', strtolower($GLOBALS['TL_CONFIG']['allowedDownload'])));
-
         $elements = [];
         $folders  = [];
         $files    = [];
@@ -145,7 +152,7 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
             } else {
                 $objFile = new File($objElement->path);
 
-                if (in_array($objFile->extension, $allowedDownload, true) && ! preg_match(
+                if ($this->isAllowed($objFile->extension) && ! preg_match(
                         '/^meta(_[a-z]{2})?\.txt$/',
                         $objFile->basename
                     )) {
@@ -274,6 +281,21 @@ abstract class AbstractFileTreeBuilder implements FileTreeBuilder
         );
 
         return $template->parse();
+    }
+
+    protected function isAllowed(string $extension) : bool
+    {
+        static $allowedDownloads = null;
+
+        if ($this->ignoreAllowedDownloads) {
+            return true;
+        }
+
+        if ($allowedDownloads === null) {
+            $allowedDownloads = array_map('trim', explode(',', strtolower($GLOBALS['TL_CONFIG']['allowedDownload'])));
+        }
+
+        return in_array($extension, $allowedDownloads, true);
     }
 
     abstract protected function getChildren(FilesModel $objElement, int $level) : array;

@@ -30,6 +30,10 @@ $GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderVisibleRoot']         
     'Zeige Quellordner',
     'Erzwinge die Darstellung des Quellordners (wird automatisch angezeigt, wenn mehrere Quellordner ausgewählt wurden).',
 ];
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderAllowAll']              = [
+    'Einstellung Erlaubte Downloads ignorieren',
+    'Wenn aktiviert, werden alle Dateien aufgelistet, auch wenn Sie nicht in der Liste der erlaubten Downloads enthalten sind.',
+];
 
 $GLOBALS['TL_LANG']['tl_content']['recursive-download-folder_legend'] = 'Rekursiver Download Ordner - Einstellungen';
 

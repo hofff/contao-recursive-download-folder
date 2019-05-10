@@ -30,6 +30,10 @@ $GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderVisibleRoot']         
     'Render root folder',
     'Force rendering of root folder (Always rendered if more than one folder is selected).',
 ];
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderAllowAll']              = [
+    'Ignore setting allowed downloads',
+    'List all files no matter if they are defined in the ignore download setting',
+];
 
 $GLOBALS['TL_LANG']['tl_content']['recursive-download-folder_legend'] = 'Recursive download folder settings';
 
