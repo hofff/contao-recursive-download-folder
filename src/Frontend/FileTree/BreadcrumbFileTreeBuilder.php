@@ -80,4 +80,13 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
             $rootIds = [$last->uuid];
         }
     }
+
+    protected function getElements(FilesModel $objParentFolder, int $level = 1): array
+    {
+        if ($level !== 1 && !$this->breadcrumb) {
+            return [];
+        }
+
+        return parent::getElements($objParentFolder, $level);
+    }
 }

@@ -91,23 +91,24 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         }
 
         $tree = [];
+        $level = ($folders->count() > 1 || $this->alwaysShowRoot) ? 2 : 1;
 
         foreach ($folders as $folder) {
-            $elements = $this->getElements($folder);
+            $elements = $this->getElements($folder, $level);
             $tree[]   = [
                 'type'              => $folder->type,
                 'data'              => $this->getFolderData($folder),
                 'elements'          => $elements,
-                'elements_rendered' => $this->getElementsRendered($elements),
+                'elements_rendered' => $this->getElementsRendered($elements, $level),
             ];
         }
 
-        if (count($tree) > 1 || $this->alwaysShowRoot) {
+        if ($level === 2) {
             $tree = [
-                'type' => 'folder',
-                'data' => ['name' => '/'],
-                'elements' => $tree,
-                'elements_rendered' => $this->getElementsRendered($tree),
+                'type'              => 'folder',
+                'data'              => ['name' => '/'],
+                'elements'          => $tree,
+                'elements_rendered' => $this->getElementsRendered($tree, $level),
             ];
         } else {
             $tree = $tree[0];
@@ -115,7 +116,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
         return [
             'breadcrumb' => [],
-            'tree' => $tree,
+            'tree'       => $tree,
         ];
     }
 
