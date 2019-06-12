@@ -53,7 +53,15 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
         $this->breadcrumb = [];
 
         $path = Input::get('path');
-        if (! $path) {
+        if (! $path || $path === '/') {
+            if (count ($rootIds) === 1) {
+                $folder = FilesModel::findByUuid($rootIds[0]);
+
+                if ($folder) {
+                    array_unshift($this->breadcrumb, $folder);
+                }
+            }
+
             return;
         }
 
