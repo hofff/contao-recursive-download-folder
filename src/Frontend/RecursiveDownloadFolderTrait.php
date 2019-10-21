@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hofff\Contao\RecursiveDownloadFolder\Frontend;
 
 use Config;
+use Contao\BackendTemplate;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\Database\Result;
@@ -17,6 +18,7 @@ use Contao\StringUtil;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\BreadcrumbFileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\FileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\ToggleableFileTreeBuilder;
+use Patchwork\Utf8;
 use function count;
 use function dirname;
 use function end;
@@ -30,6 +32,7 @@ use function sprintf;
 use function strpos;
 use function strtolower;
 use function trim;
+use const TL_MODE;
 
 trait RecursiveDownloadFolderTrait
 {
@@ -56,6 +59,18 @@ trait RecursiveDownloadFolderTrait
      */
     public function generate() : string
     {
+        if (TL_MODE === 'BE') {
+            $template           = new BackendTemplate('be_wildcard');
+            $template->wildcard = sprintf(
+                '### %s ###',
+                Utf8::strtoupper($GLOBALS['TL_LANG']['FMD']['hofff_recursive-download-folder'][0])
+            );
+            $template->title    = $this->headline;
+            $template->href     = $this->addToUrl('act=edit&id=' . $this->id);
+
+            return $template->parse();
+        }
+
         // Use the home directory of the current user as file source
         if ($this->useHomeDir && FE_USER_LOGGED_IN) {
             $this->import('FrontendUser', 'User');
