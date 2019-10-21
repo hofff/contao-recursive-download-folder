@@ -6,6 +6,7 @@ namespace Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree;
 
 use Contao\FilesModel;
 use Contao\Input;
+use Contao\StringUtil;
 use function array_unshift;
 use function end;
 use function in_array;
@@ -42,7 +43,7 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
             $url = $GLOBALS['objPage']->getFrontendUrl();
         }
 
-        $url .= '?path=' . $element['data']['path'];
+        $url .= '?path=' . urlencode($element['data']['path']);
 
         return $url;
     }
