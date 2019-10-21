@@ -1,6 +1,20 @@
 # Changelog
 
-## [Unreleased]
+## [3.1.0]
+
+### Added
+
+ - Add frontend module
+ - Add breadcrumb based view
+ - Allow to select multiple folders
+ 
+### Fixed
+ 
+ - Fix issue with `InvalidParameterException` in the backend when using `prepend_locale` see
+   [#18](https://github.com/hofff/contao-recursive-download-folder/issues/18)
+
+
+## [3.0.0]
 
 ### Changed
 

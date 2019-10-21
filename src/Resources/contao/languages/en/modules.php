@@ -8,3 +8,8 @@ $GLOBALS['TL_LANG']['CTE']['hofff_recursive-download-folder'] = [
     'Recursive download folder',
     'Recursive download folder',
 ];
+
+$GLOBALS['TL_LANG']['FMD']['hofff_recursive-download-folder'] = [
+    'Recursive download folder',
+    'Recursive download folder',
+];

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Hofff\Contao\RecursiveDownloadFolder\Frontend\Element;
+namespace Hofff\Contao\RecursiveDownloadFolder\Frontend\Module;
 
-use Contao\ContentElement;
+use Contao\Module;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\RecursiveDownloadFolderTrait;
 
 /**
- * Class ContentRecursiveDownloadFolder
+ * Class RecursiveDownloadFolderModule
  *
- * Front end content element "hofff_recursive-download-folder".
+ * Front end content module "hofff_recursive-download-folder".
  *
  * @property mixed recursiveDownloadFolderHideEmptyFolders
  * @property mixed recursiveDownloadFolderAllowFileSearch
@@ -19,7 +19,7 @@ use Hofff\Contao\RecursiveDownloadFolder\Frontend\RecursiveDownloadFolderTrait;
  * @property mixed recursiveDownloadFolderMode
  * @property mixed recursiveDownloadFolderVisibleRoot
  */
-class RecursiveDownloadFolderElement extends ContentElement
+class RecursiveDownloadFolderModule extends Module
 {
     use RecursiveDownloadFolderTrait;
 
@@ -28,5 +28,5 @@ class RecursiveDownloadFolderElement extends ContentElement
      *
      * @var string
      */
-    protected $strTemplate = 'ce_recursive-download-folder';
+    protected $strTemplate = 'mod_hofff_recursive-download-folder';
 }
