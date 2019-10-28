@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.1.2]
+
+ - Fix javascript and styles
+
+## [3.1.1]
+
+### Fixed
+
+ - Restore compatibility with PHP 7.1
+
 ## [3.1.0]
 
 ### Added
