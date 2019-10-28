@@ -1,19 +1,12 @@
-function toggleFolder(link)
-{
-	toggleClass(link.parentElement, 'folder-open');
-}
+document.addEventListener("DOMContentLoaded", function(event) {
+    var links = document.querySelectorAll('.hofff-recursive-download-folder-toggleable .download-element > a');
 
-function toggleClass(element, className){
-    if (!element || !className){
-        return;
-    }
+    for (var i = 0; i < links.length; i++) {
+        links[i].addEventListener('click', function (event) {
+            event.preventDefault();
 
-    var classString = element.className, nameIndex = classString.indexOf(className);
-    if (nameIndex === -1) {
-        classString += ' ' + className;
+            event.target.parentElement.classList.toggle('folder-open');
+        })
     }
-    else {
-        classString = classString.substr(0, nameIndex) + classString.substr(nameIndex+className.length);
-    }
-    element.className = classString;
-}
+});
+

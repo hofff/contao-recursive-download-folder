@@ -1,24 +1,29 @@
+.mod_hofff_recursive-download-folder .folder > a,
+.mod_hofff_recursive-download-folder .folder > span,
 .ce_hofff_recursive-download-folder .folder > a,
 .ce_hofff_recursive-download-folder .folder > span
 {
 	font-weight: bold;
 }
+
+.mod_hofff_recursive-download-folder .folder > a,
 .ce_hofff_recursive-download-folder .folder > a
 {
 	cursor: pointer;
 }
 
+.mod_hofff_recursive-download-folder .folder-empty > span,
 .ce_hofff_recursive-download-folder .folder-empty > span
 {
 	opacity: .5;
 }
 
-.ce_hofff_recursive-download-folder .folder > ul
+.hofff-recursive-download-folder-toggleable .folder > ul
 {
 	display: none;
 }
 
-.ce_hofff_recursive-download-folder .folder-open > ul
+.hofff-recursive-download-folder-toggleable .folder-open > ul
 {
 	display: block;
 }
