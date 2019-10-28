@@ -32,7 +32,6 @@ use function sprintf;
 use function strpos;
 use function strtolower;
 use function trim;
-use const TL_MODE;
 
 trait RecursiveDownloadFolderTrait
 {
@@ -112,7 +111,7 @@ trait RecursiveDownloadFolderTrait
     /**
      * Generate the content element
      */
-    protected function compile() : void
+    protected function compile()
     {
         $treeBuilder = $this->createTreeBuilder();
         $fileTree    = $treeBuilder->build($this->folderSRC);
