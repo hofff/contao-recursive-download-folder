@@ -1,6 +1,14 @@
 # Changelog
 
+## [3.1.3]
+
+### Fixed
+
+ - Fix file download in toggleable view
+
 ## [3.1.2]
+
+### Fixed
 
  - Fix javascript and styles
 

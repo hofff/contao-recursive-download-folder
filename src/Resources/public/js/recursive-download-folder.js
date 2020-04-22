@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function(event) {
-    var links = document.querySelectorAll('.hofff-recursive-download-folder-toggleable .download-element > a');
+    var links = document.querySelectorAll('.hofff-recursive-download-folder-toggleable .folder.download-element > a');
 
     for (var i = 0; i < links.length; i++) {
         links[i].addEventListener('click', function (event) {
