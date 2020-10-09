@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.1.4]
+
+### Fixed
+
+ - Fix broken backend when using `prepend_locale` in Contao 4.9 ([#23](https://github.com/hofff/contao-recursive-download-folder/issues/23))
+
 ## [3.1.3]
 
 ### Fixed
@@ -65,3 +71,10 @@
 ## Version 1.0.0-beta1 (2015-07-15)
 
 - Initial release
+
+[3.1.4]: https://github.com/hofff/contao-recursive-download-folder/compare/3.1.3...3.1.4
+[3.1.3]: https://github.com/hofff/contao-recursive-download-folder/compare/3.1.2...3.1.3
+[3.1.2]: https://github.com/hofff/contao-recursive-download-folder/compare/3.1.1...3.1.2
+[3.1.1]: https://github.com/hofff/contao-recursive-download-folder/compare/3.1.0...3.1.1
+[3.1.0]: https://github.com/hofff/contao-recursive-download-folder/compare/3.0.0...3.1.0
+[3.0.0]: https://github.com/hofff/contao-recursive-download-folder/compare/2.1.0...3.0.0

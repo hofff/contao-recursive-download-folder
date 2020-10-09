@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hofff\Contao\RecursiveDownloadFolder\Frontend;
 
 use Config;
+use Contao\Backend;
 use Contao\BackendTemplate;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
@@ -64,8 +65,7 @@ trait RecursiveDownloadFolderTrait
                 '### %s ###',
                 Utf8::strtoupper($GLOBALS['TL_LANG']['FMD']['hofff_recursive-download-folder'][0])
             );
-            $template->title    = $this->headline;
-            $template->href     = $this->addToUrl('act=edit&id=' . $this->id);
+            $template->title    = $this->headline ?: $this->name;
 
             return $template->parse();
         }
