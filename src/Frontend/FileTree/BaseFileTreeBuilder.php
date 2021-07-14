@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree;
 
+use Contao\Config;
+use Contao\Controller;
 use Contao\Environment;
 use Contao\File;
 use Contao\FilesModel;
@@ -12,9 +14,11 @@ use Contao\FrontendTemplate;
 use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
+
 use function array_map;
 use function array_merge;
 use function array_values;
+use function assert;
 use function count;
 use function explode;
 use function in_array;
@@ -42,61 +46,108 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
     protected $allowFileSearch = false;
 
     /** @var bool */
+    protected $showAllSearchResults = false;
+
+    /** @var bool */
     protected $alwaysShowRoot = false;
 
     /** @var bool */
     protected $ignoreAllowedDownloads = false;
 
-    public function hideEmptyFolders() : FileTreeBuilder
+    /** @var bool */
+    protected $allowFolderDownload = false;
+
+    /** @var array<int,string>|null */
+    protected $thumbnailSize;
+
+    public function withTemplate(string $templateName): FileTreeBuilder
+    {
+        $this->templateName = $templateName;
+
+        return $this;
+    }
+
+    /** @param array<int,string> $thumbnailSize */
+    public function withThumbnailSize(array $thumbnailSize): FileTreeBuilder
+    {
+        $this->thumbnailSize = $thumbnailSize;
+
+        return $this;
+    }
+
+    public function hideEmptyFolders(): FileTreeBuilder
     {
         $this->hideEmptyFolders = true;
 
         return $this;
     }
 
-    public function showAllLevels() : FileTreeBuilder
+    public function showAllLevels(): FileTreeBuilder
     {
         $this->showAllLevels = true;
 
         return $this;
     }
 
-    public function allowFileSearch() : FileTreeBuilder
+    public function allowFileSearch(): FileTreeBuilder
     {
         $this->allowFileSearch = true;
 
         return $this;
     }
 
-    public function alwaysShowRoot() : FileTreeBuilder
+    public function showAllSearchResults(): FileTreeBuilder
+    {
+        $this->showAllSearchResults = true;
+
+        return $this;
+    }
+
+    public function alwaysShowRoot(): FileTreeBuilder
     {
         $this->alwaysShowRoot = true;
 
         return $this;
     }
 
-    public function ignoreAllowedDownloads() : FileTreeBuilder
+    public function ignoreAllowedDownloads(): FileTreeBuilder
     {
         $this->ignoreAllowedDownloads = true;
 
         return $this;
     }
 
+    public function allowFolderDownload(): FileTreeBuilder
+    {
+        $this->allowFolderDownload = true;
+
+        return $this;
+    }
+
     /** @inheritDoc */
-    public function build(array $uuids) : array
+    public function build(array $uuids): array
     {
         $folders = FilesModel::findMultipleByUuids($uuids);
         if ($folders === null) {
             return [];
         }
 
-        $tree = [];
-        $level = ($folders->count() > 1 || $this->alwaysShowRoot) ? 2 : 1;
+        if (
+            $this->allowFileSearch && $this->showAllSearchResults &&
+            ! empty(trim((string) Input::get('keyword')))
+        ) {
+            $this->showAllLevels();
+        }
+
+        $tree  = [];
+        $level = $folders->count() > 1 || $this->alwaysShowRoot ? 2 : 1;
 
         foreach ($folders as $folder) {
             $elements = $this->getElements($folder, $level);
             $tree[]   = [
                 'type'              => $folder->type,
+                'href'              => $this->generateDownloadLink($folder),
+                'model'             => $folder,
                 'data'              => $this->getFolderData($folder),
                 'elements'          => $elements,
                 'elements_rendered' => $this->getElementsRendered($elements, $level),
@@ -123,7 +174,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
     /**
      * @return mixed[][]
      */
-    protected function getElements(FilesModel $objParentFolder, int $level = 1) : array
+    protected function getElements(FilesModel $objParentFolder, int $level = 1): array
     {
         $elements = [];
         $folders  = [];
@@ -137,20 +188,22 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
         foreach ($objElements as $objElement) {
             if ($objElement->type === 'folder') {
-                $count    = FilesModel::countByPid($objElement->uuid);
                 $elements = $this->getChildren($objElement, $level + 1);
+                $count    = count($elements);
 
                 if (($this->hideEmptyFolders && $count) || ! $this->hideEmptyFolders) {
                     $strCssClass = 'folder';
                     if ($this->showAllLevels) {
                         $strCssClass .= ' folder-open';
                     }
+
                     if (! $count) {
                         $strCssClass .= ' folder-empty';
                     }
 
                     $folders[$objElement->name] = [
                         'type'              => $objElement->type,
+                        'model'             => $objElement,
                         'data'              => $this->getFolderData($objElement),
                         'elements'          => $elements,
                         'elements_rendered' => $this->getElementsRendered($elements, $level + 1),
@@ -161,10 +214,12 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
             } else {
                 $objFile = new File($objElement->path);
 
-                if ($this->isAllowed($objFile->extension) && ! preg_match(
-                    '/^meta(_[a-z]{2})?\.txt$/',
-                    $objFile->basename
-                )) {
+                if (
+                    $this->isAllowed($objFile->extension) && ! preg_match(
+                        '/^meta(_[a-z]{2})?\.txt$/',
+                        $objFile->basename
+                    )
+                ) {
                     $arrFileData = $this->getFileData($objFile, $objElement);
                     $fileMatches = true;
 
@@ -173,6 +228,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
                         if (! empty($arrFileData['link'])) {
                             $visibleFileName = $arrFileData['link'];
                         }
+
                         // use exact, case insensitive string search
                         $fileMatches = (stripos($visibleFileName, trim(Input::get('keyword'))) !== false);
                     }
@@ -182,6 +238,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
                         $files[$objFile->basename] = [
                             'type'      => $objElement->type,
+                            'model'     => $objElement,
                             'data'      => $arrFileData,
                             'css_class' => $strCssClass,
                         ];
@@ -206,7 +263,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
      *
      * @return mixed[]
      */
-    protected function getFileData(File $objFile, FilesModel $fileModel) : array
+    protected function getFileData(File $objFile, FilesModel $fileModel): array
     {
         $meta = Frontend::getMetaData($fileModel->meta, $GLOBALS['TL_LANGUAGE']);
 
@@ -214,18 +271,6 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         if (! isset($meta['title']) || $meta['title'] === '') {
             $meta['title'] = StringUtil::specialchars($objFile->basename);
         }
-
-        $strHref = Environment::get('request');
-
-        // Remove an existing file parameter (see #5683)
-        if (preg_match('/(&(amp;)?|\?)file=/', $strHref)) {
-            $strHref = preg_replace('/(&(amp;)?|\?)file=[^&]+/', '', $strHref);
-        }
-
-        $strHref .= ($GLOBALS['TL_CONFIG']['disableAlias'] || strpos(
-            $strHref,
-            '?'
-        ) !== false ? '&amp;' : '?') . 'file=' . System::urlEncode($fileModel->path);
 
         return [
             'id'        => $objFile->id,
@@ -236,7 +281,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
             ),
             'link'      => $meta['title'],
             'caption'   => $meta['caption'],
-            'href'      => $strHref,
+            'href'      => $this->generateDownloadLink($fileModel),
             'filesize'  => Frontend::getReadableSize($objFile->filesize),
             'mime'      => $objFile->mime,
             'meta'      => $meta,
@@ -253,7 +298,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
      *
      * @return mixed[]
      */
-    protected function getFolderData(FilesModel $objFolder) : array
+    protected function getFolderData(FilesModel $objFolder): array
     {
         $meta = Frontend::getMetaData($objFolder->meta, $GLOBALS['TL_LANGUAGE']);
 
@@ -264,6 +309,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
         return [
             'id'    => $objFolder->id,
+            'href'  => $this->generateDownloadLink($objFolder),
             'uuid'  => $objFolder->uuid,
             'name'  => $objFolder->name,
             'title' => $objFolder->name,
@@ -274,7 +320,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
     }
 
     /** @param mixed[][] $elements */
-    protected function getElementsRendered(array $elements, int $level = 1) : string
+    protected function getElementsRendered(array $elements, int $level = 1): string
     {
         if (count($elements) === 0) {
             return '';
@@ -285,8 +331,11 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
             [
                 'level'    => 'level_' . $level,
                 'elements' => $elements,
-                'generateLink' => function (array $element) : string {
+                'generateLink' => function (array $element): string {
                     return $this->generateLink($element);
+                },
+                'generateThumbnail' => function (array $element): string {
+                    return $this->generateThumbnail($element);
                 },
             ]
         );
@@ -294,7 +343,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         return $template->parse();
     }
 
-    protected function isAllowed(string $extension) : bool
+    protected function isAllowed(string $extension): bool
     {
         static $allowedDownloads = null;
 
@@ -310,8 +359,58 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
     }
 
     /** @return mixed[][] */
-    abstract protected function getChildren(FilesModel $objElement, int $level) : array;
+    abstract protected function getChildren(FilesModel $objElement, int $level): array;
 
     /** @param mixed[] $element */
-    abstract protected function generateLink(array $element) : string;
+    abstract protected function generateLink(array $element): string;
+
+    protected function generateDownloadLink(FilesModel $model): ?string
+    {
+        if ($model->type === 'folder' && ! $this->allowFolderDownload) {
+            return null;
+        }
+
+        $strHref = Environment::get('request');
+
+        // Remove an existing file parameter (see #5683)
+        if (preg_match('/(&(amp;)?|\?)file=/', $strHref)) {
+            $strHref = preg_replace('/(&(amp;)?|\?)file=[^&]+/', '', $strHref);
+        }
+
+        $strHref .= ($GLOBALS['TL_CONFIG']['disableAlias'] || strpos($strHref, '?') !== false ? '&amp;' : '?')
+            . 'file='
+            . System::urlEncode($model->path);
+
+        return $strHref;
+    }
+
+    /** @param array<string,mixed> $element */
+    protected function generateThumbnail(array $element): string
+    {
+        $model = $element['model'];
+        assert($model instanceof FilesModel);
+
+        if ($model->type !== 'file') {
+            return '';
+        }
+
+        $imageExtensions = StringUtil::trimsplit(',', Config::get('validImageTypes'));
+        if (! in_array($model->extension, $imageExtensions)) {
+            return '';
+        }
+
+        $template = new FrontendTemplate('image');
+        Controller::addImageToTemplate(
+            $template,
+            [
+                'singleSRC' => $model->path,
+                'size'      => $this->thumbnailSize,
+            ],
+            null,
+            null,
+            $model
+        );
+
+        return $template->parse();
+    }
 }

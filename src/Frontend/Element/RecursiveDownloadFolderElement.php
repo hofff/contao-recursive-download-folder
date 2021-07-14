@@ -8,8 +8,6 @@ use Contao\ContentElement;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\RecursiveDownloadFolderTrait;
 
 /**
- * Class ContentRecursiveDownloadFolder
- *
  * Front end content element "hofff_recursive-download-folder".
  *
  * @property mixed recursiveDownloadFolderHideEmptyFolders

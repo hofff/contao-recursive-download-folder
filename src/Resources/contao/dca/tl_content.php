@@ -4,16 +4,22 @@ declare(strict_types=1);
 
 use Contao\Controller;
 
+$GLOBALS['TL_DCA']['tl_content']['palettes']['__selector__'][]
+    = 'recursiveDownloadFolderAllowFileSearch';
+
 $GLOBALS['TL_DCA']['tl_content']['palettes']['hofff_recursive-download-folder']
     = '{type_legend},type,headline'
     . ';{source_legend},folderSRC,useHomeDir'
     . ';{recursive-download-folder_legend},recursiveDownloadFolderMode,recursiveDownloadFolderHideEmptyFolders'
-    . ',recursiveDownloadFolderShowAllLevels,recursiveDownloadFolderAllowFileSearch,recursiveDownloadFolderVisibleRoot'
-    . ',recursiveDownloadFolderAllowAll'
-    . ';{template_legend:hide},recursiveDownloadFolderTpl,customTpl'
+    . ',recursiveDownloadFolderShowAllLevels,recursiveDownloadFolderVisibleRoot'
+    . ',recursiveDownloadFolderAllowAll,recursiveDownloadFolderZipDownload,recursiveDownloadFolderAllowFileSearch'
+    . ';{template_legend:hide},recursiveDownloadFolderTpl,customTpl,size'
     . ';{protected_legend:hide},protected'
     . ';{expert_legend:hide},guests,cssID,space'
     . ';{invisible_legend:hide},invisible,start,stop';
+
+$GLOBALS['TL_DCA']['tl_content']['subpalettes']['recursiveDownloadFolderAllowFileSearch']
+    = 'recursiveDownloadFolderShowAllSearchResults';
 
 $GLOBALS['TL_DCA']['tl_content']['fields']['folderSRC'] = [
     'label'     => &$GLOBALS['TL_LANG']['tl_content']['folderSRC'],
@@ -50,8 +56,24 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['recursiveDownloadFolderShowAllLevels
     'sql'       => "char(1) NOT NULL default ''",
 ];
 
+$GLOBALS['TL_DCA']['tl_content']['fields']['recursiveDownloadFolderZipDownload'] = [
+    'label'     => &$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderZipDownload'],
+    'exclude'   => true,
+    'inputType' => 'checkbox',
+    'eval'      => ['tl_class' => 'w50'],
+    'sql'       => "char(1) NOT NULL default ''",
+];
+
 $GLOBALS['TL_DCA']['tl_content']['fields']['recursiveDownloadFolderAllowFileSearch'] = [
     'label'     => &$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderAllowFileSearch'],
+    'exclude'   => true,
+    'inputType' => 'checkbox',
+    'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true],
+    'sql'       => "char(1) NOT NULL default ''",
+];
+
+$GLOBALS['TL_DCA']['tl_content']['fields']['recursiveDownloadFolderShowAllSearchResults'] = [
+    'label'     => &$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderShowAllSearchResults'],
     'exclude'   => true,
     'inputType' => 'checkbox',
     'eval'      => ['tl_class' => 'w50'],

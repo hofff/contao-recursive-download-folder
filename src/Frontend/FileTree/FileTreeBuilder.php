@@ -6,20 +6,20 @@ namespace Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree;
 
 interface FileTreeBuilder
 {
-    public function hideEmptyFolders() : self;
+    public function hideEmptyFolders(): self;
 
-    public function showAllLevels() : self;
+    public function showAllLevels(): self;
 
-    public function allowFileSearch() : self;
+    public function allowFileSearch(): self;
 
-    public function alwaysShowRoot() : self;
+    public function alwaysShowRoot(): self;
 
-    public function ignoreAllowedDownloads() : self;
+    public function ignoreAllowedDownloads(): self;
 
     /**
      * @param mixed[] $uuids
      *
      * @return mixed[]
      */
-    public function build(array $uuids) : array;
+    public function build(array $uuids): array;
 }
