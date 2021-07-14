@@ -17,9 +17,7 @@ Provides a content element for Contao CMS to define a recursive download folder 
 
 ## Compatibility
 
-- min. Contao version: >= 4.4.0
-- max. Contao version: <  5
-
+- min. Contao version: ^ 4.9.0
 
 ## Installation
 

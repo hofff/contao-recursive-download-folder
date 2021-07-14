@@ -1,5 +1,9 @@
 # Changelog
 
+## [3.2.1]
+
+ - Fix minimum requirements of Contao
+
 ## [3.2.0]
 
 ### Added
@@ -84,6 +88,7 @@
 
 - Initial release
 
+[3.2.1]: https://github.com/hofff/contao-recursive-download-folder/compare/3.2.0...3.2.1
 [3.2.0]: https://github.com/hofff/contao-recursive-download-folder/compare/3.1.4...3.2.0
 [3.1.4]: https://github.com/hofff/contao-recursive-download-folder/compare/3.1.3...3.1.4
 [3.1.3]: https://github.com/hofff/contao-recursive-download-folder/compare/3.1.2...3.1.3
