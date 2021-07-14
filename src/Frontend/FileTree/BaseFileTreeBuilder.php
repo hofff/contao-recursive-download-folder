@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree;
 
+use Contao\Config;
+use Contao\Controller;
 use Contao\Environment;
 use Contao\File;
 use Contao\FilesModel;
@@ -49,6 +51,23 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
     /** @var bool */
     protected $ignoreAllowedDownloads = false;
+
+    /** @var array|null */
+    protected $thumbnailSize;
+
+    public function withTemplate(string $templateName) : FileTreeBuilder
+    {
+        $this->templateName = $templateName;
+
+        return $this;
+    }
+
+    public function withThumbnailSize(array $thumbnailSize) : FileTreeBuilder
+    {
+        $this->thumbnailSize = $thumbnailSize;
+
+        return $this;
+    }
 
     public function hideEmptyFolders() : FileTreeBuilder
     {
@@ -167,6 +186,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
                     $folders[$objElement->name] = [
                         'type'              => $objElement->type,
+                        'model'             => $objElement,
                         'data'              => $this->getFolderData($objElement),
                         'elements'          => $elements,
                         'elements_rendered' => $this->getElementsRendered($elements, $level + 1),
@@ -198,6 +218,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
                         $files[$objFile->basename] = [
                             'type'      => $objElement->type,
+                            'model'     => $objElement,
                             'data'      => $arrFileData,
                             'css_class' => $strCssClass,
                         ];
@@ -304,6 +325,9 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
                 'generateLink' => function (array $element) : string {
                     return $this->generateLink($element);
                 },
+                'generateThumbnail' => function (array $element) : string {
+                    return $this->generateThumbnail($element);
+                }
             ]
         );
 
@@ -330,4 +354,32 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
     /** @param mixed[] $element */
     abstract protected function generateLink(array $element) : string;
+
+    protected function generateThumbnail(array $element) : string
+    {
+        $model = $element['model'];
+        assert($model instanceof FilesModel);
+
+        if ($model->type !== 'file') {
+            return '';
+        }
+
+        $imageExtensions = StringUtil::trimsplit(',', Config::get('validImageTypes'));
+        if (!in_array($model->extension, $imageExtensions)) {
+            return '';
+        }
+
+        $template = new FrontendTemplate('image');
+        Controller::addImageToTemplate(
+            $template,
+            [
+                'singleSRC' => $model->path,
+                'size'      => $this->thumbnailSize,
+            ],
+            null,
+            null,
+            $model);
+
+        return $template->parse();
+    }
 }

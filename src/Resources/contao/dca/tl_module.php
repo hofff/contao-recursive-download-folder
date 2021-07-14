@@ -11,7 +11,7 @@ $GLOBALS['TL_DCA']['tl_module']['palettes']['hofff_recursive-download-folder']
     . ';{recursive-download-folder_legend},recursiveDownloadFolderMode,recursiveDownloadFolderHideEmptyFolders'
     . ',recursiveDownloadFolderShowAllLevels,recursiveDownloadFolderVisibleRoot'
     . ',recursiveDownloadFolderAllowAll,recursiveDownloadFolderAllowFileSearch'
-    . ';{template_legend:hide},recursiveDownloadFolderTpl,customTpl'
+    . ';{template_legend:hide},recursiveDownloadFolderTpl,customTpl,size'
     . ';{protected_legend:hide},protected'
     . ';{expert_legend:hide},guests,cssID,space'
     . ';{invisible_legend:hide},invisible,start,stop';

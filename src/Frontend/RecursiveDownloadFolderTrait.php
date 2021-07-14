@@ -184,13 +184,16 @@ trait RecursiveDownloadFolderTrait
             $treeBuilder = new ToggleableFileTreeBuilder();
         }
 
+        $treeBuilder->withThumbnailSize(StringUtil::deserialize($this->size, true));
+
+        if ($this->recursiveDownloadFolderTpl) {
+            $treeBuilder->withTemplate($this->recursiveDownloadFolderTpl);
+        }
+
         if ($this->recursiveDownloadFolderAllowFileSearch) {
             $treeBuilder->allowFileSearch();
 
-            //  TODO: Add to interface in next major
-            if ($this->recursiveDownloadFolderShowAllSearchResults
-                && method_exists($treeBuilder,'showAllSearchResults')
-            ) {
+            if ($this->recursiveDownloadFolderShowAllSearchResults) {
                 $treeBuilder->showAllSearchResults();
             }
         }
