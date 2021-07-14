@@ -9,13 +9,13 @@ use Contao\FilesModel;
 final class ToggleableFileTreeBuilder extends BaseFileTreeBuilder
 {
     /** @inheritDoc */
-    protected function getChildren(FilesModel $objElement, int $level) : array
+    protected function getChildren(FilesModel $objElement, int $level): array
     {
         return $this->getElements($objElement, $level);
     }
 
     /** @inheritDoc */
-    protected function generateLink(array $element) : string
+    protected function generateLink(array $element): string
     {
         return '#';
     }

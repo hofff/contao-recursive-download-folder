@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Hofff\Contao\RecursiveDownloadFolder\Frontend;
 
 use Config;
-use Contao\Backend;
 use Contao\BackendTemplate;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
@@ -22,10 +21,11 @@ use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\FileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\ToggleableFileTreeBuilder;
 use Patchwork\Utf8;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use ZipArchive;
+
+use function basename;
 use function count;
 use function dirname;
 use function end;
@@ -36,8 +36,12 @@ use function preg_match;
 use function preg_quote;
 use function preg_replace;
 use function sprintf;
+use function strlen;
 use function strpos;
 use function strtolower;
+use function substr;
+use function sys_get_temp_dir;
+use function tempnam;
 use function trim;
 
 trait RecursiveDownloadFolderTrait
@@ -51,9 +55,8 @@ trait RecursiveDownloadFolderTrait
 
     /**
      * @param Model|Result $objElement
-     * @param string       $strColumn
      */
-    public function __construct($objElement, $strColumn = 'main')
+    public function __construct($objElement, string $strColumn = 'main')
     {
         parent::__construct($objElement, $strColumn);
 
@@ -63,7 +66,7 @@ trait RecursiveDownloadFolderTrait
     /**
      * Return if there are no files
      */
-    public function generate() : string
+    public function generate(): string
     {
         if (TL_MODE === 'BE') {
             $template           = new BackendTemplate('be_wildcard');
@@ -113,11 +116,10 @@ trait RecursiveDownloadFolderTrait
         return parent::generate();
     }
 
-
     /**
      * Generate the content element
      */
-    protected function compile()
+    protected function compile(): void
     {
         $treeBuilder = $this->createTreeBuilder();
         $fileTree    = $treeBuilder->build($this->folderSRC);
@@ -125,11 +127,13 @@ trait RecursiveDownloadFolderTrait
         $this->cssID = [
             $this->cssID[0],
             trim(
-                $this->cssID[1] . ' hofff-recursive-download-folder-' . ($this->recursiveDownloadFolderMode ?: 'toggleable')
+                $this->cssID[1]
+                . ' hofff-recursive-download-folder-'
+                . ($this->recursiveDownloadFolderMode ?: 'toggleable')
             ),
         ];
 
-        $this->Template->generateBreadcrumbLink = static function (string $path) : string {
+        $this->Template->generateBreadcrumbLink = static function (string $path): string {
             $url = '';
 
             if (isset($GLOBALS['objPage'])) {
@@ -182,7 +186,7 @@ trait RecursiveDownloadFolderTrait
             'bundles/hofffcontaorecursivedownloadfolde/js/recursive-download-folder.min.js';
     }
 
-    protected function createTreeBuilder() : FileTreeBuilder
+    protected function createTreeBuilder(): FileTreeBuilder
     {
         if ($this->recursiveDownloadFolderMode === 'breadcrumb') {
             $treeBuilder = new BreadcrumbFileTreeBuilder();
@@ -227,7 +231,7 @@ trait RecursiveDownloadFolderTrait
         return $treeBuilder;
     }
 
-    protected function downloadAsFile(string $path) : void
+    protected function downloadAsFile(string $path): void
     {
         $file = FilesModel::findOneByPath($path);
         if ($file === null) {
@@ -248,7 +252,7 @@ trait RecursiveDownloadFolderTrait
 
         $data = $treeBuilder->build([$file->uuid]);
 
-        $zipFile = tempnam(sys_get_temp_dir(), 'hofff-recursive-download-zip') . '.zip';
+        $zipFile    = tempnam(sys_get_temp_dir(), 'hofff-recursive-download-zip') . '.zip';
         $zipArchive = new ZipArchive();
         $zipArchive->open($zipFile, ZipArchive::CREATE);
 
@@ -260,7 +264,11 @@ trait RecursiveDownloadFolderTrait
         $response->setAutoEtag();
 
         $filename = basename($file->path) . '.zip';
-        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $filename, Utf8::toAscii($filename));
+        $response->setContentDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $filename,
+            Utf8::toAscii($filename)
+        );
         $response->headers->addCacheControlDirective('must-revalidate');
         $response->headers->set('Connection', 'close');
         $response->headers->set('Content-Type', 'application/zip');
@@ -268,12 +276,16 @@ trait RecursiveDownloadFolderTrait
         throw new ResponseException($response);
     }
 
+    /** @param array<int,array<string,mixed>> $elements */
     protected function addElementsToZip(array $elements, ZipArchive $zipArchive, string $rootPath): void
     {
         foreach ($elements as $element) {
             switch ($element['type']) {
                 case 'file':
-                    $zipArchive->addFile(TL_ROOT . '/' . $element['model']->path, substr($element['model']->path, strlen($rootPath)));
+                    $zipArchive->addFile(
+                        TL_ROOT . '/' . $element['model']->path,
+                        substr($element['model']->path, strlen($rootPath))
+                    );
                     break;
 
                 case 'folder':
@@ -290,7 +302,7 @@ trait RecursiveDownloadFolderTrait
      *
      * @throws AccessDeniedException
      */
-    protected function sendFile(string $strFile) : void
+    protected function sendFile(string $strFile): void
     {
         // Make sure there are no attempts to hack the file system
         if (preg_match('@^\.+@', $strFile) || preg_match('@\.+/@', $strFile) || preg_match('@(://)+@', $strFile)) {

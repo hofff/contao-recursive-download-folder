@@ -6,11 +6,13 @@ namespace Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree;
 
 use Contao\FilesModel;
 use Contao\Input;
-use Contao\StringUtil;
+
 use function array_unshift;
+use function count;
 use function end;
 use function in_array;
 use function urldecode;
+use function urlencode;
 
 final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
 {
@@ -18,7 +20,7 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
     private $breadcrumb = [];
 
     /** @inheritDoc */
-    public function build(array $uuids) : array
+    public function build(array $uuids): array
     {
         $this->buildBreadcrumb($uuids);
 
@@ -29,13 +31,13 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
     }
 
     /** @inheritDoc */
-    protected function getChildren(FilesModel $objElement, int $level) : array
+    protected function getChildren(FilesModel $objElement, int $level): array
     {
         return [];
     }
 
     /** @inheritDoc */
-    protected function generateLink(array $element) : string
+    protected function generateLink(array $element): string
     {
         $url = '';
 
@@ -49,13 +51,13 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
     }
 
     /** @param string[] $rootIds */
-    private function buildBreadcrumb(array &$rootIds) : void
+    private function buildBreadcrumb(array &$rootIds): void
     {
         $this->breadcrumb = [];
 
         $path = Input::get('path');
         if (! $path || $path === '/') {
-            if (count ($rootIds) === 1) {
+            if (count($rootIds) === 1) {
                 $folder = FilesModel::findByUuid($rootIds[0]);
 
                 if ($folder) {
@@ -90,9 +92,10 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
         }
     }
 
+    /** @return array<int, array<string,mixed>> */
     protected function getElements(FilesModel $objParentFolder, int $level = 1): array
     {
-        if ($level !== 1 && !$this->breadcrumb) {
+        if ($level !== 1 && ! $this->breadcrumb) {
             return [];
         }
 

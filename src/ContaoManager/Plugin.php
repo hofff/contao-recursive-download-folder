@@ -14,9 +14,10 @@ use Hofff\Contao\RecursiveDownloadFolder\HofffContaoRecursiveDownloadFolderBundl
 final class Plugin implements BundlePluginInterface
 {
     /** @return ConfigInterface[] */
-    public function getBundles(ParserInterface $parser) : array
+    public function getBundles(ParserInterface $parser): array
     {
-        return [BundleConfig::create(HofffContaoRecursiveDownloadFolderBundle::class)
+        return [
+            BundleConfig::create(HofffContaoRecursiveDownloadFolderBundle::class)
                 ->setLoadAfter([ContaoCoreBundle::class])
                 ->setReplace(['hofff_recursive-download-folder']),
         ];

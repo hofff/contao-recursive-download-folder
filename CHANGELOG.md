@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.2.0]
+
+### Added
+
+ - Add option to download folders as zip archives
+ - Add new template which shows thumbnails of images
+ - Add option to show all search results
+
+### Fixed
+
+ - Recognize show empty folder option for search results
+
 ## [3.1.4]
 
 ### Fixed
@@ -72,6 +84,7 @@
 
 - Initial release
 
+[3.2.0]: https://github.com/hofff/contao-recursive-download-folder/compare/3.1.4...3.2.0
 [3.1.4]: https://github.com/hofff/contao-recursive-download-folder/compare/3.1.3...3.1.4
 [3.1.3]: https://github.com/hofff/contao-recursive-download-folder/compare/3.1.2...3.1.3
 [3.1.2]: https://github.com/hofff/contao-recursive-download-folder/compare/3.1.1...3.1.2

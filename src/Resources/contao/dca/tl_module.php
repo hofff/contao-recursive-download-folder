@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use Contao\Controller;
 
-$GLOBALS['TL_DCA']['tl_module']['palettes']['__selector__'][] = 'recursiveDownloadFolderAllowFileSearch';
+$GLOBALS['TL_DCA']['tl_module']['palettes']['__selector__'][]
+    = 'recursiveDownloadFolderAllowFileSearch';
+
 $GLOBALS['TL_DCA']['tl_module']['palettes']['hofff_recursive-download-folder']
     = '{type_legend},name,headline,type'
     . ';{source_legend},folderSRC,useHomeDir'
@@ -16,7 +18,8 @@ $GLOBALS['TL_DCA']['tl_module']['palettes']['hofff_recursive-download-folder']
     . ';{expert_legend:hide},guests,cssID,space'
     . ';{invisible_legend:hide},invisible,start,stop';
 
-$GLOBALS['TL_DCA']['tl_module']['subpalettes']['recursiveDownloadFolderAllowFileSearch'] = 'recursiveDownloadFolderShowAllSearchResults';
+$GLOBALS['TL_DCA']['tl_module']['subpalettes']['recursiveDownloadFolderAllowFileSearch']
+    = 'recursiveDownloadFolderShowAllSearchResults';
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['folderSRC'] = [
     'label'     => &$GLOBALS['TL_LANG']['tl_module']['folderSRC'],

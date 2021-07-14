@@ -2,43 +2,43 @@
 
 declare(strict_types=1);
 
-$GLOBALS['TL_LANG']['tl_module']['folderSRC']                               = [
+$GLOBALS['TL_LANG']['tl_module']['folderSRC']                                   = [
     'Quellordner',
     'Bitte wählen Sie einen Ordner aus dem Dateibaum aus, dessen Inhalt rekursiv zum Download zur Verfügung stehen soll.',
 ];
-$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderHideEmptyFolders'] = [
+$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderHideEmptyFolders']     = [
     'Leere Ordner nicht anzeigen',
     'Bitte wählen Sie diese Option wenn leere Ordner nicht Frontedn nicht angezeigt werden sollen.',
 ];
-$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderShowAllLevels']    = [
+$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderShowAllLevels']        = [
     'Alle Ebenen anzeigen',
     'Bitte wählen Sie diese Option wenn die Ordner-Struktur initial im Frontend expandiert angezeigt werden soll.',
 ];
-$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderAllowFileSearch']  = [
+$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderAllowFileSearch']      = [
     'Dateisuche erlauben',
     'Bitte wählen Sie diese Option wenn die Suche nach Dateien im Frontend erlaubt sein soll.',
 ];
-$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderShowAllSearchResults']  = [
+$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderShowAllSearchResults'] = [
     'Ordner mit Suchergebnissen aufklappen',
     'Bitte wählen Sie diese Option wenn Ordner mit Suchergebnissen standardmäßig aufgeklappt sein sollen.',
 ];
-$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderTpl']              = [
+$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderTpl']                  = [
     'Template für den rekursiven Download Ordner',
     'Bitte wählen Sie das Template für den rekursiven Download Ordner aus.',
 ];
-$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderMode']             = [
+$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderMode']                 = [
     'Darstellungsmodus',
     'Wählen Sie den Darstellungsmodus für die Ordnerstruktur.',
 ];
-$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderVisibleRoot']      = [
+$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderVisibleRoot']          = [
     'Zeige Quellordner',
     'Erzwinge die Darstellung des Quellordners (wird automatisch angezeigt, wenn mehrere Quellordner ausgewählt wurden).',
 ];
-$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderAllowAll']         = [
+$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderAllowAll']             = [
     'Einstellung Erlaubte Downloads ignorieren',
     'Wenn aktiviert, werden alle Dateien aufgelistet, auch wenn Sie nicht in der Liste der erlaubten Downloads enthalten sind.',
 ];
-$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderZipDownload']         = [
+$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderZipDownload']          = [
     'Ordner herunterladen',
     'Wenn aktiviert, können Ordner als Zip-Archiv heruntergeladen werden.',
 ];
