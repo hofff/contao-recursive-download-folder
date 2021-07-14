@@ -239,7 +239,7 @@ trait RecursiveDownloadFolderTrait
         }
 
         if ($file->type === 'file') {
-            $this->sendFile($file);
+            $this->sendFile($file->path);
 
             return;
         }

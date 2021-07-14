@@ -1,6 +1,14 @@
 # Changelog
 
+## [3.2.2]
+
+### Fixed
+
+ - Fix file download
+
 ## [3.2.1]
+
+### Fixed
 
  - Fix minimum requirements of Contao
 
