@@ -6,7 +6,10 @@
     <span title="<?php echo $element['data']['title']; ?>"><?php echo $element['data']['link']; ?></span>
   <?php else : ?>    
     <a href="<?= $this->generateLink($element) ?>" title="<?php echo $element['data']['title']; ?>"><?php echo $element['data']['link']; ?></a><?php echo $element['elements_rendered']; ?>
-  <?php endif; ?>    
+  <?php endif; ?>
+  <?php if ($element['data']['href']): ?>
+    <a href="<?= $element['data']['href'] ?>" class="download-as-zip"><?= $this->trans('MSC.recursiveDownloadFolderDownloadAsZip', [], 'contao_default') ?></a>
+  <?php endif ?>
   </li>
   <?php else: ?>
   <li class="download-element <?php echo $element['css_class']; ?>"><a href="<?php echo $element['data']['href']; ?>" title="<?php echo $element['data']['title']; ?>"><?php echo $element['data']['link']; ?> <span class="size">(<?php echo $element['data']['filesize']; ?>)</span></a></li>

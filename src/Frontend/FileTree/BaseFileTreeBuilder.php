@@ -52,6 +52,9 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
     /** @var bool */
     protected $ignoreAllowedDownloads = false;
 
+    /** @var bool */
+    protected $allowFolderDownload = false;
+
     /** @var array|null */
     protected $thumbnailSize;
 
@@ -111,6 +114,13 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         return $this;
     }
 
+    public function allowFolderDownload(): FileTreeBuilder
+    {
+        $this->allowFolderDownload = true;
+
+        return $this;
+    }
+
     /** @inheritDoc */
     public function build(array $uuids) : array
     {
@@ -132,6 +142,8 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
             $elements = $this->getElements($folder, $level);
             $tree[]   = [
                 'type'              => $folder->type,
+                'href'              => $this->generateDownloadLink($folder),
+                'model'             => $folder,
                 'data'              => $this->getFolderData($folder),
                 'elements'          => $elements,
                 'elements_rendered' => $this->getElementsRendered($elements, $level),
@@ -252,18 +264,6 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
             $meta['title'] = StringUtil::specialchars($objFile->basename);
         }
 
-        $strHref = Environment::get('request');
-
-        // Remove an existing file parameter (see #5683)
-        if (preg_match('/(&(amp;)?|\?)file=/', $strHref)) {
-            $strHref = preg_replace('/(&(amp;)?|\?)file=[^&]+/', '', $strHref);
-        }
-
-        $strHref .= ($GLOBALS['TL_CONFIG']['disableAlias'] || strpos(
-            $strHref,
-            '?'
-        ) !== false ? '&amp;' : '?') . 'file=' . System::urlEncode($fileModel->path);
-
         return [
             'id'        => $objFile->id,
             'uuid'      => $objFile->uuid,
@@ -273,7 +273,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
             ),
             'link'      => $meta['title'],
             'caption'   => $meta['caption'],
-            'href'      => $strHref,
+            'href'      => $this->generateDownloadLink($fileModel),
             'filesize'  => Frontend::getReadableSize($objFile->filesize),
             'mime'      => $objFile->mime,
             'meta'      => $meta,
@@ -301,6 +301,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
         return [
             'id'    => $objFolder->id,
+            'href'  => $this->generateDownloadLink($objFolder),
             'uuid'  => $objFolder->uuid,
             'name'  => $objFolder->name,
             'title' => $objFolder->name,
@@ -354,6 +355,26 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
     /** @param mixed[] $element */
     abstract protected function generateLink(array $element) : string;
+
+    protected function generateDownloadLink(FilesModel $model) : ?string
+    {
+        if ($model->type === 'folder' && !$this->allowFolderDownload) {
+            return null;
+        }
+
+        $strHref = Environment::get('request');
+
+        // Remove an existing file parameter (see #5683)
+        if (preg_match('/(&(amp;)?|\?)file=/', $strHref)) {
+            $strHref = preg_replace('/(&(amp;)?|\?)file=[^&]+/', '', $strHref);
+        }
+
+        $strHref .= ($GLOBALS['TL_CONFIG']['disableAlias'] || strpos($strHref, '?') !== false ? '&amp;' : '?')
+            . 'file='
+            . System::urlEncode($model->path);
+
+        return $strHref;
+    }
 
     protected function generateThumbnail(array $element) : string
     {

@@ -9,6 +9,7 @@ use Contao\Backend;
 use Contao\BackendTemplate;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
+use Contao\CoreBundle\Exception\ResponseException;
 use Contao\Database\Result;
 use Contao\Environment;
 use Contao\File;
@@ -20,6 +21,11 @@ use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\BreadcrumbFileTreeBui
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\FileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\ToggleableFileTreeBuilder;
 use Patchwork\Utf8;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use ZipArchive;
 use function count;
 use function dirname;
 use function end;
@@ -100,7 +106,7 @@ trait RecursiveDownloadFolderTrait
                     continue;
                 }
 
-                $this->sendFile($file);
+                $this->downloadAsFile($file);
             }
         }
 
@@ -214,7 +220,67 @@ trait RecursiveDownloadFolderTrait
             $treeBuilder->ignoreAllowedDownloads();
         }
 
+        if ($this->recursiveDownloadFolderZipDownload) {
+            $treeBuilder->allowFolderDownload();
+        }
+
         return $treeBuilder;
+    }
+
+    protected function downloadAsFile(string $path) : void
+    {
+        $file = FilesModel::findOneByPath($path);
+        if ($file === null) {
+            throw new BadRequestException();
+        }
+
+        if ($file->type === 'file') {
+            $this->sendFile($file);
+
+            return;
+        }
+
+        if (! $this->recursiveDownloadFolderZipDownload) {
+            throw new NotFoundHttpException();
+        }
+
+        $treeBuilder = $this->createTreeBuilder();
+
+        $data = $treeBuilder->build([$file->uuid]);
+
+        $zipFile = tempnam(sys_get_temp_dir(), 'hofff-recursive-download-zip') . '.zip';
+        $zipArchive = new ZipArchive();
+        $zipArchive->open($zipFile, ZipArchive::CREATE);
+
+        $this->addElementsToZip($data['tree']['elements'], $zipArchive, $file->path);
+        $zipArchive->close();
+
+        $response = new BinaryFileResponse($zipFile);
+        $response->setPrivate(); // public by default
+        $response->setAutoEtag();
+
+        $filename = basename($file->path) . '.zip';
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $filename, Utf8::toAscii($filename));
+        $response->headers->addCacheControlDirective('must-revalidate');
+        $response->headers->set('Connection', 'close');
+        $response->headers->set('Content-Type', 'application/zip');
+
+        throw new ResponseException($response);
+    }
+
+    protected function addElementsToZip(array $elements, ZipArchive $zipArchive, string $rootPath): void
+    {
+        foreach ($elements as $element) {
+            switch ($element['type']) {
+                case 'file':
+                    $zipArchive->addFile(TL_ROOT . '/' . $element['model']->path, substr($element['model']->path, strlen($rootPath)));
+                    break;
+
+                case 'folder':
+                    $this->addElementsToZip($element['elements'], $zipArchive, $rootPath);
+                    break;
+            }
+        }
     }
 
     /**

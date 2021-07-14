@@ -38,6 +38,10 @@ $GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderAllowAll']         = [
     'Ignore setting allowed downloads',
     'List all files no matter if they are defined in the ignore download setting',
 ];
+$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderZipDownload']         = [
+    'Allow to download folders',
+    'If enabled a folder can be downloaded as zip archive',
+];
 
 $GLOBALS['TL_LANG']['tl_module']['recursive-download-folder_legend'] = 'Recursive download folder settings';
 

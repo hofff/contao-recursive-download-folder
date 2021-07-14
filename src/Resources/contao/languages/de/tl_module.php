@@ -38,6 +38,10 @@ $GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderAllowAll']         = [
     'Einstellung Erlaubte Downloads ignorieren',
     'Wenn aktiviert, werden alle Dateien aufgelistet, auch wenn Sie nicht in der Liste der erlaubten Downloads enthalten sind.',
 ];
+$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderZipDownload']         = [
+    'Ordner herunterladen',
+    'Wenn aktiviert, können Ordner als Zip-Archiv heruntergeladen werden.',
+];
 
 $GLOBALS['TL_LANG']['tl_module']['recursive-download-folder_legend'] = 'Rekursiver Download Ordner - Einstellungen';
 
