@@ -137,8 +137,8 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
         foreach ($objElements as $objElement) {
             if ($objElement->type === 'folder') {
-                $count    = FilesModel::countByPid($objElement->uuid);
                 $elements = $this->getChildren($objElement, $level + 1);
+                $count    = count($elements);
 
                 if (($this->hideEmptyFolders && $count) || ! $this->hideEmptyFolders) {
                     $strCssClass = 'folder';
