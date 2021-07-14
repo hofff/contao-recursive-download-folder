@@ -18,6 +18,10 @@ $GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderAllowFileSearch']  = [
     'Dateisuche erlauben',
     'Bitte wählen Sie diese Option wenn die Suche nach Dateien im Frontend erlaubt sein soll.',
 ];
+$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderShowAllSearchResults']  = [
+    'Ordner mit Suchergebnissen aufklappen',
+    'Bitte wählen Sie diese Option wenn Ordner mit Suchergebnissen standardmäßig aufgeklappt sein sollen.',
+];
 $GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderTpl']              = [
     'Template für den rekursiven Download Ordner',
     'Bitte wählen Sie das Template für den rekursiven Download Ordner aus.',

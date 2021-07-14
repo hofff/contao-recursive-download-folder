@@ -42,6 +42,9 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
     protected $allowFileSearch = false;
 
     /** @var bool */
+    protected $showAllSearchResults = false;
+
+    /** @var bool */
     protected $alwaysShowRoot = false;
 
     /** @var bool */
@@ -68,6 +71,13 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         return $this;
     }
 
+    public function showAllSearchResults() : FileTreeBuilder
+    {
+        $this->showAllSearchResults = true;
+
+        return $this;
+    }
+
     public function alwaysShowRoot() : FileTreeBuilder
     {
         $this->alwaysShowRoot = true;
@@ -88,6 +98,12 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         $folders = FilesModel::findMultipleByUuids($uuids);
         if ($folders === null) {
             return [];
+        }
+
+        if ($this->allowFileSearch && $this->showAllSearchResults &&
+            ! empty(trim((string) Input::get('keyword')))
+        ) {
+            $this->showAllLevels();
         }
 
         $tree = [];

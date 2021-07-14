@@ -8,7 +8,7 @@ $GLOBALS['TL_LANG']['tl_content']['folderSRC']                               = [
 ];
 $GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderHideEmptyFolders'] = [
     'Leere Ordner nicht anzeigen',
-    'Bitte wählen Sie diese Option wenn leere Ordner nicht Frontedn nicht angezeigt werden sollen.',
+    'Bitte wählen Sie diese Option wenn leere Ordner nicht Frontend nicht angezeigt werden sollen.',
 ];
 $GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderShowAllLevels']    = [
     'Alle Ebenen anzeigen',
@@ -17,6 +17,10 @@ $GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderShowAllLevels']    = [
 $GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderAllowFileSearch']  = [
     'Dateisuche erlauben',
     'Bitte wählen Sie diese Option wenn die Suche nach Dateien im Frontend erlaubt sein soll.',
+];
+$GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderShowAllSearchResults']  = [
+    'Ordner mit Suchergebnissen aufklappen',
+    'Bitte wählen Sie diese Option wenn Ordner mit Suchergebnissen standardmäßig aufgeklappt sein sollen.',
 ];
 $GLOBALS['TL_LANG']['tl_content']['recursiveDownloadFolderTpl']              = [
     'Template für den rekursiven Download Ordner',

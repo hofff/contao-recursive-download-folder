@@ -18,6 +18,10 @@ $GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderAllowFileSearch']  = [
     'Allow file search',
     'Choose this option if searching for files should be allowed in the front end.',
 ];
+$GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderShowAllSearchResults']  = [
+    'Expand folders with search results',
+    'Choose this option if you want to open folders with search results',
+];
 $GLOBALS['TL_LANG']['tl_module']['recursiveDownloadFolderTpl']              = [
     'Template for recursive download folder',
     'Please select the template for the recursive download folder.',

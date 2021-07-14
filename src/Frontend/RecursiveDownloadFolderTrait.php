@@ -186,6 +186,13 @@ trait RecursiveDownloadFolderTrait
 
         if ($this->recursiveDownloadFolderAllowFileSearch) {
             $treeBuilder->allowFileSearch();
+
+            //  TODO: Add to interface in next major
+            if ($this->recursiveDownloadFolderShowAllSearchResults
+                && method_exists($treeBuilder,'showAllSearchResults')
+            ) {
+                $treeBuilder->showAllSearchResults();
+            }
         }
 
         if ($this->recursiveDownloadFolderHideEmptyFolders) {
