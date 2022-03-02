@@ -12,6 +12,7 @@ use Contao\FilesModel;
 use Contao\Frontend;
 use Contao\FrontendTemplate;
 use Contao\Input;
+use Contao\Model\Collection;
 use Contao\StringUtil;
 use Contao\System;
 
@@ -31,6 +32,10 @@ use function strpos;
 use function strtolower;
 use function trim;
 
+/**
+ * @SuppressWarnings(PHPMD.LongVariable)
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ */
 abstract class BaseFileTreeBuilder implements FileTreeBuilder
 {
     /** @var string */
@@ -128,7 +133,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
     public function build(array $uuids): array
     {
         $folders = FilesModel::findMultipleByUuids($uuids);
-        if ($folders === null) {
+        if (! $folders instanceof Collection) {
             return [];
         }
 
@@ -173,6 +178,9 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
     /**
      * @return mixed[][]
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     protected function getElements(FilesModel $objParentFolder, int $level = 1): array
     {
@@ -182,7 +190,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
         $objElements = FilesModel::findByPid($objParentFolder->uuid);
 
-        if ($objElements === null) {
+        if (! $objElements instanceof Collection) {
             return $elements;
         }
 
@@ -262,9 +270,12 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
      * Get all data for a file
      *
      * @return mixed[]
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     protected function getFileData(File $objFile, FilesModel $fileModel): array
     {
+        /** @psalm-suppress PossiblyInvalidArgument */
         $meta = Frontend::getMetaData($fileModel->meta, $GLOBALS['TL_LANGUAGE']);
 
         // Use the file name as title if none is given
@@ -297,9 +308,12 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
      * Get all data for a folder
      *
      * @return mixed[]
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     protected function getFolderData(FilesModel $objFolder): array
     {
+        /** @psalm-suppress PossiblyInvalidArgument */
         $meta = Frontend::getMetaData($objFolder->meta, $GLOBALS['TL_LANGUAGE']);
 
         // Use the folder name as title if none is given
@@ -352,7 +366,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         }
 
         if ($allowedDownloads === null) {
-            $allowedDownloads = array_map('trim', explode(',', strtolower($GLOBALS['TL_CONFIG']['allowedDownload'])));
+            $allowedDownloads = array_map('trim', explode(',', strtolower(Config::get('allowedDownload'))));
         }
 
         return in_array($extension, $allowedDownloads, true);
@@ -377,7 +391,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
             $strHref = preg_replace('/(&(amp;)?|\?)file=[^&]+/', '', $strHref);
         }
 
-        $strHref .= ($GLOBALS['TL_CONFIG']['disableAlias'] || strpos($strHref, '?') !== false ? '&amp;' : '?')
+        $strHref .= (Config::get('disableAlias') || strpos($strHref, '?') !== false ? '&amp;' : '?')
             . 'file='
             . System::urlEncode($model->path);
 

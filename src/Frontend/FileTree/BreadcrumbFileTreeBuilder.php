@@ -36,7 +36,11 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
         return [];
     }
 
-    /** @inheritDoc */
+    /**
+     * {@inheritDoc}
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
     protected function generateLink(array $element): string
     {
         $url = '';
@@ -50,7 +54,11 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
         return $url;
     }
 
-    /** @param string[] $rootIds */
+    /**
+     * @param string[] $rootIds
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     */
     private function buildBreadcrumb(array &$rootIds): void
     {
         $this->breadcrumb = [];
@@ -88,7 +96,7 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
             $this->breadcrumb = [];
         } elseif ($this->breadcrumb) {
             $last    = end($this->breadcrumb);
-            $rootIds = [$last->uuid];
+            $rootIds = [(string) $last->uuid];
         }
     }
 

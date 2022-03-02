@@ -10,12 +10,17 @@ use Hofff\Contao\RecursiveDownloadFolder\Frontend\RecursiveDownloadFolderTrait;
 /**
  * Front end content element "hofff_recursive-download-folder".
  *
- * @property mixed recursiveDownloadFolderHideEmptyFolders
- * @property mixed recursiveDownloadFolderAllowFileSearch
- * @property mixed recursiveDownloadFolderShowAllLevels
- * @property mixed recursiveDownloadFolderTpl
- * @property mixed recursiveDownloadFolderMode
- * @property mixed recursiveDownloadFolderVisibleRoot
+ * @property mixed $recursiveDownloadFolderHideEmptyFolders
+ * @property mixed $recursiveDownloadFolderAllowFileSearch
+ * @property mixed $recursiveDownloadFolderShowAllLevels
+ * @property mixed $recursiveDownloadFolderTpl
+ * @property mixed $recursiveDownloadFolderMode
+ * @property mixed $recursiveDownloadFolderVisibleRoot
+ * @property mixed $recursiveDownloadFolderAllowAll
+ * @property mixed $recursiveDownloadFolderZipDownload
+ * @property mixed $recursiveDownloadFolderShowAllSearchResults
+ * @property mixed $folderSRC
+ * @psalm-suppress PropertyNotSetInConstructor
  */
 class RecursiveDownloadFolderElement extends ContentElement
 {

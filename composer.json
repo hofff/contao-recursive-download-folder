@@ -1,15 +1,14 @@
 {
   "name": "hofff/contao-recursive-download-folder",
-  "type": "contao-bundle",
   "description": "Content element for Contao CMS to define a recursive download folder.",
+  "license": "LGPL-3.0-or-later",
+  "type": "contao-bundle",
   "keywords": [
     "download",
     "downloads",
     "folder",
     "recursive"
   ],
-  "homepage": "https://www.hofff.com",
-  "license": "LGPL-3.0-or-later",
   "authors": [
     {
       "name": "David Molineus",
@@ -30,33 +29,43 @@
       "role": "Manager"
     }
   ],
+  "homepage": "https://www.hofff.com",
   "require": {
-    "php": ">=7.1",
+    "php": "^7.1 || ^8.0",
+    "ext-mbstring": "*",
     "ext-zip": "*",
     "contao/core-bundle": "^4.9",
     "symfony/config": "^4.4 || ^5.0",
     "symfony/dependency-injection": "^4.4 || ^5.0",
-    "symfony/http-kernel": "^4.4 || ^5.0",
-    "symfony/http-foundation": "^4.4 || ^5.0"
-  },
-  "conflict": {
-    "contao/manager-plugin": "<2.1 || >= 3.0"
+    "symfony/http-foundation": "^4.4 || ^5.0",
+    "symfony/http-kernel": "^4.4 || ^5.0"
   },
   "require-dev": {
     "contao/manager-plugin": "^2.1",
-    "doctrine/coding-standard": "^8.0"
+    "doctrine/coding-standard": "^9.0",
+    "phpcq/runner-bootstrap": "^1.0@dev"
   },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "3.2.x-dev",
-      "dev-develop": "3.3.x-dev",
-      "dev-support/2.x": "2.1.x-dev"
-    },
-    "contao-manager-plugin": "Hofff\\Contao\\RecursiveDownloadFolder\\ContaoManager\\Plugin"
+  "conflict": {
+    "contao/manager-plugin": "<2.1 || >= 3.0"
   },
   "autoload": {
     "psr-4": {
       "Hofff\\Contao\\RecursiveDownloadFolder\\": "src/"
     }
+  },
+  "config": {
+    "allow-plugins": {
+      "contao-components/installer": false,
+      "contao/manager-plugin": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-develop": "3.3.x-dev",
+      "dev-master": "3.2.x-dev",
+      "dev-support/2.x": "2.1.x-dev"
+    },
+    "contao-manager-plugin": "Hofff\\Contao\\RecursiveDownloadFolder\\ContaoManager\\Plugin"
   }
 }

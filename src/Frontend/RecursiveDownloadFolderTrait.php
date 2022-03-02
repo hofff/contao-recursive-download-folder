@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\RecursiveDownloadFolder\Frontend;
 
-use Config;
 use Contao\BackendTemplate;
+use Contao\Config;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\CoreBundle\Exception\ResponseException;
@@ -15,23 +15,28 @@ use Contao\File;
 use Contao\FilesModel;
 use Contao\Input;
 use Contao\Model;
+use Contao\Model\Collection;
 use Contao\StringUtil;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\BreadcrumbFileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\FileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\ToggleableFileTreeBuilder;
-use Patchwork\Utf8;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use ZipArchive;
 
+use function assert;
 use function basename;
 use function count;
+use function defined;
 use function dirname;
 use function end;
 use function file_exists;
 use function in_array;
 use function is_array;
+use function mb_convert_encoding;
+use function mb_strtoupper;
 use function preg_match;
 use function preg_quote;
 use function preg_replace;
@@ -49,7 +54,7 @@ trait RecursiveDownloadFolderTrait
     /**
      * Files object
      *
-     * @var FilesModel
+     * @var FilesModel|Collection|null
      */
     protected $objFolder;
 
@@ -58,6 +63,7 @@ trait RecursiveDownloadFolderTrait
      */
     public function __construct($objElement, string $strColumn = 'main')
     {
+        /** @psalm-suppress ArgumentTypeCoercion */
         parent::__construct($objElement, $strColumn);
 
         $this->folderSRC = StringUtil::deserialize($this->folderSRC, true);
@@ -65,16 +71,21 @@ trait RecursiveDownloadFolderTrait
 
     /**
      * Return if there are no files
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function generate(): string
     {
-        if (TL_MODE === 'BE') {
+        if (defined('TL_MODE') && TL_MODE === 'BE') {
             $template           = new BackendTemplate('be_wildcard');
             $template->wildcard = sprintf(
                 '### %s ###',
-                Utf8::strtoupper($GLOBALS['TL_LANG']['FMD']['hofff_recursive-download-folder'][0])
+                mb_strtoupper($GLOBALS['TL_LANG']['FMD']['hofff_recursive-download-folder'][0], 'UTF-8')
             );
-            $template->title    = $this->headline ?: $this->name;
+            /** @psalm-suppress UndefinedThisPropertyFetch */
+            $template->title = $this->headline ?: $this->name;
 
             return $template->parse();
         }
@@ -83,6 +94,7 @@ trait RecursiveDownloadFolderTrait
         if ($this->useHomeDir && FE_USER_LOGGED_IN) {
             $this->import('FrontendUser', 'User');
 
+            /** @psalm-suppress UndefinedThisPropertyFetch */
             if ($this->User->assignDir && $this->User->homeDir) {
                 $this->folderSRC = [$this->User->homeDir];
             }
@@ -94,13 +106,13 @@ trait RecursiveDownloadFolderTrait
         }
 
         // Get the folders from the database
-        $this->objFolder = FilesModel::findMultipleByUuids($this->folderSRC);
-
-        if ($this->objFolder === null) {
+        $collection = FilesModel::findMultipleByUuids($this->folderSRC);
+        if (! $collection instanceof Collection) {
             return '';
         }
 
-        $file = Input::get('file', true);
+        $this->objFolder = $collection;
+        $file            = Input::get('file', true);
 
         // Send the file to the browser and do not send a 404 header (see #4632)
         if ($file !== '' && $file !== null) {
@@ -118,12 +130,15 @@ trait RecursiveDownloadFolderTrait
 
     /**
      * Generate the content element
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     protected function compile(): void
     {
         $treeBuilder = $this->createTreeBuilder();
         $fileTree    = $treeBuilder->build($this->folderSRC);
 
+        /** @psalm-suppress InvalidPropertyAssignmentValue */
         $this->cssID = [
             $this->cssID[0],
             trim(
@@ -174,7 +189,7 @@ trait RecursiveDownloadFolderTrait
             );
         }
 
-        if (TL_MODE !== 'BE') {
+        if (defined('TL_MODE') && TL_MODE !== 'BE') {
             return;
         }
 
@@ -186,6 +201,10 @@ trait RecursiveDownloadFolderTrait
             'bundles/hofffcontaorecursivedownloadfolde/js/recursive-download-folder.min.js';
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     */
     protected function createTreeBuilder(): FileTreeBuilder
     {
         if ($this->recursiveDownloadFolderMode === 'breadcrumb') {
@@ -234,7 +253,7 @@ trait RecursiveDownloadFolderTrait
     protected function downloadAsFile(string $path): void
     {
         $file = FilesModel::findOneByPath($path);
-        if ($file === null) {
+        if (! $file instanceof FilesModel) {
             throw new BadRequestException();
         }
 
@@ -267,7 +286,7 @@ trait RecursiveDownloadFolderTrait
         $response->setContentDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             $filename,
-            Utf8::toAscii($filename)
+            mb_convert_encoding($filename, 'UTF-8', 'ASCII')
         );
         $response->headers->addCacheControlDirective('must-revalidate');
         $response->headers->set('Connection', 'close');
@@ -279,6 +298,8 @@ trait RecursiveDownloadFolderTrait
     /** @param array<int,array<string,mixed>> $elements */
     protected function addElementsToZip(array $elements, ZipArchive $zipArchive, string $rootPath): void
     {
+        assert(defined('TL_ROOT'));
+
         foreach ($elements as $element) {
             switch ($element['type']) {
                 case 'file':
@@ -301,9 +322,14 @@ trait RecursiveDownloadFolderTrait
      * @param string $strFile The file path
      *
      * @throws AccessDeniedException
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     protected function sendFile(string $strFile): void
     {
+        assert(defined('TL_ROOT'));
+
         // Make sure there are no attempts to hack the file system
         if (preg_match('@^\.+@', $strFile) || preg_match('@\.+/@', $strFile) || preg_match('@(://)+@', $strFile)) {
             throw new PageNotFoundException('Invalid file name');
@@ -320,7 +346,7 @@ trait RecursiveDownloadFolderTrait
         }
 
         $objFile         = new File($strFile);
-        $arrAllowedTypes = \StringUtil::trimsplit(',', strtolower(Config::get('allowedDownload')));
+        $arrAllowedTypes = StringUtil::trimsplit(',', strtolower(Config::get('allowedDownload')));
 
         // Check whether the file type is allowed to be downloaded
         if (! $this->recursiveDownloadFolderAllowAll && ! in_array($objFile->extension, $arrAllowedTypes)) {

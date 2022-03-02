@@ -13,7 +13,11 @@ use Hofff\Contao\RecursiveDownloadFolder\HofffContaoRecursiveDownloadFolderBundl
 
 final class Plugin implements BundlePluginInterface
 {
-    /** @return ConfigInterface[] */
+    /**
+     * @return ConfigInterface[]
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function getBundles(ParserInterface $parser): array
     {
         return [

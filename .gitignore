@@ -10,3 +10,6 @@
 !/screenshot*.png
 !phpcs.xml.dist
 !.composer-require-checker.json
+!.phpcq.yaml.dist
+!.github
+!psalm.xml
