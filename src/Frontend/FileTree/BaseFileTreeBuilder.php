@@ -15,6 +15,7 @@ use Contao\Input;
 use Contao\Model\Collection;
 use Contao\StringUtil;
 use Contao\System;
+use Exception;
 
 use function array_map;
 use function array_merge;
@@ -33,6 +34,23 @@ use function strtolower;
 use function trim;
 
 /**
+ * @psalm-type TFileMetaData = array{
+ *   id: string|int,
+ *   uuid: string|null,
+ *   name: string,
+ *   title: string,
+ *   link: string,
+ *   caption: string,
+ *   href: string|null,
+ *   filesize: string,
+ *   mime: string,
+ *   meta: array<string,mixed>,
+ *   extension: string,
+ *   path: string,
+ *   ctime: int,
+ *   mtime: int,
+ *   atime: int,
+ * }
  * @SuppressWarnings(PHPMD.LongVariable)
  * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
@@ -64,6 +82,9 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
     /** @var array<int,string>|null */
     protected $thumbnailSize;
+
+    /** @var array<string,array<string,TFileMetaData>> */
+    private $metaDataCache = [];
 
     public function withTemplate(string $templateName): FileTreeBuilder
     {
@@ -196,16 +217,16 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
 
         foreach ($objElements as $objElement) {
             if ($objElement->type === 'folder') {
-                $elements = $this->getChildren($objElement, $level + 1);
-                $count    = count($elements);
+                $elements    = $this->getChildren($objElement, $level + 1);
+                $hasChildren = $this->hasChildren($objElement, $level + 1);
 
-                if (($this->hideEmptyFolders && $count) || ! $this->hideEmptyFolders) {
+                if (($this->hideEmptyFolders && $hasChildren) || ! $this->hideEmptyFolders) {
                     $strCssClass = 'folder';
                     if ($this->showAllLevels) {
                         $strCssClass .= ' folder-open';
                     }
 
-                    if (! $count) {
+                    if (! $hasChildren) {
                         $strCssClass .= ' folder-empty';
                     }
 
@@ -215,42 +236,22 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
                         'data'              => $this->getFolderData($objElement),
                         'elements'          => $elements,
                         'elements_rendered' => $this->getElementsRendered($elements, $level + 1),
-                        'is_empty'          => $count === 0,
+                        'is_empty'          => ! $hasChildren,
                         'css_class'         => $strCssClass,
                     ];
                 }
-            } else {
-                $objFile = new File($objElement->path);
+            } elseif ($this->isAllowed($objElement->extension)) {
+                $arrFileData = $this->getMetaData($objElement);
 
-                if (
-                    $this->isAllowed($objFile->extension) && ! preg_match(
-                        '/^meta(_[a-z]{2})?\.txt$/',
-                        $objFile->basename
-                    )
-                ) {
-                    $arrFileData = $this->getFileData($objFile, $objElement);
-                    $fileMatches = true;
+                if ($this->matches($arrFileData)) {
+                    $strCssClass = 'file file-' . $arrFileData['extension'] . ' ext-' . $arrFileData['extension'];
 
-                    if ($this->allowFileSearch && ! empty(trim((string) Input::get('keyword')))) {
-                        $visibleFileName = $arrFileData['name'];
-                        if (! empty($arrFileData['link'])) {
-                            $visibleFileName = $arrFileData['link'];
-                        }
-
-                        // use exact, case insensitive string search
-                        $fileMatches = (stripos($visibleFileName, trim(Input::get('keyword'))) !== false);
-                    }
-
-                    if ($fileMatches) {
-                        $strCssClass = 'file file-' . $arrFileData['extension'] . ' ext-' . $arrFileData['extension'];
-
-                        $files[$objFile->basename] = [
-                            'type'      => $objElement->type,
-                            'model'     => $objElement,
-                            'data'      => $arrFileData,
-                            'css_class' => $strCssClass,
-                        ];
-                    }
+                    $files[$arrFileData['name']] = [
+                        'type'      => $objElement->type,
+                        'model'     => $objElement,
+                        'data'      => $arrFileData,
+                        'css_class' => $strCssClass,
+                    ];
                 }
             }
         }
@@ -267,15 +268,37 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
     }
 
     /**
-     * Get all data for a file
+     * @return array<string,mixed>
+     * @psalm-return TFileMetaData
      *
-     * @return mixed[]
+     * @throws Exception
+     */
+    protected function getMetaData(FilesModel $file): array
+    {
+        /** @psalm-suppress DeprecatedMethod */
+        return $this->getFileData(new File($file->path), $file);
+    }
+
+    /**
+     * Get all data for a file.
+     *
+     * @deprecated Use BaseFileTreeBuilder::getMetaData() instead
+     *
+     * @return array<string,mixed>
+     * @psalm-return TFileMetaData
      *
      * @SuppressWarnings(PHPMD.Superglobals)
      */
     protected function getFileData(File $objFile, FilesModel $fileModel): array
     {
-        /** @psalm-suppress PossiblyInvalidArgument */
+        if (isset($this->metaDataCache[$GLOBALS['TL_LANGUAGE']][$fileModel->path])) {
+            return $this->metaDataCache[$GLOBALS['TL_LANGUAGE']][$fileModel->path];
+        }
+
+        /**
+         * @psalm-suppress PossiblyInvalidArgument
+         * @psalm-var array<string,mixed> $meta
+         */
         $meta = Frontend::getMetaData($fileModel->meta, $GLOBALS['TL_LANGUAGE']);
 
         // Use the file name as title if none is given
@@ -283,25 +306,29 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
             $meta['title'] = StringUtil::specialchars($objFile->basename);
         }
 
-        return [
-            'id'        => $objFile->id,
-            'uuid'      => $objFile->uuid,
-            'name'      => $objFile->basename,
+        $metadata = [
+            'id'        => $fileModel->id,
+            'uuid'      => $fileModel->uuid,
+            'name'      => (string) $objFile->basename,
             'title'     => StringUtil::specialchars(
                 sprintf($GLOBALS['TL_LANG']['MSC']['download'], $objFile->basename)
             ),
-            'link'      => $meta['title'],
-            'caption'   => $meta['caption'],
+            'link'      => (string) $meta['title'],
+            'caption'   => (string) $meta['caption'],
             'href'      => $this->generateDownloadLink($fileModel),
             'filesize'  => Frontend::getReadableSize($objFile->filesize),
-            'mime'      => $objFile->mime,
+            'mime'      => (string) $objFile->mime,
             'meta'      => $meta,
-            'extension' => $objFile->extension,
-            'path'      => $objFile->dirname,
-            'ctime'     => $objFile->ctime,
-            'mtime'     => $objFile->mtime,
-            'atime'     => $objFile->atime,
+            'extension' => (string) $objFile->extension,
+            'path'      => (string) $objFile->dirname,
+            'ctime'     => (int) $objFile->ctime,
+            'mtime'     => (int) $objFile->mtime,
+            'atime'     => (int) $objFile->atime,
         ];
+
+        $this->metaDataCache[$GLOBALS['TL_LANGUAGE']][$fileModel->path] = $metadata;
+
+        return $metadata;
     }
 
     /**
@@ -372,8 +399,57 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         return in_array($extension, $allowedDownloads, true);
     }
 
-    /** @return mixed[][] */
+    /** @param TFileMetaData $metadata */
+    protected function matches(array $metadata): bool
+    {
+        $keyword = trim((string) Input::get('keyword'));
+        if (! $this->allowFileSearch || empty($keyword)) {
+            return true;
+        }
+
+        $visibleFileName = $metadata['name'];
+        if (! empty($metadata['link'])) {
+            $visibleFileName = $metadata['link'];
+        }
+
+        // use exact, case insensitive string search
+        return stripos($visibleFileName, $keyword) !== false;
+    }
+
+    /**
+     * Will return all visible children of an element.
+     *
+     * @return mixed[][]
+     */
     abstract protected function getChildren(FilesModel $objElement, int $level): array;
+
+    /**
+     * Will count if an element has children. It should also contain true even if the children are not visible.
+     */
+    protected function hasChildren(FilesModel $element, int $level): bool
+    {
+        $children = FilesModel::findByPid($element->uuid);
+
+        if (! $children instanceof Collection) {
+            return false;
+        }
+
+        foreach ($children as $child) {
+            if ($child->type === 'folder') {
+                if ($this->hasChildren($child, $level + 1)) {
+                    return true;
+                }
+            } elseif ($this->isAllowed($child->extension)) {
+                $arrFileData = $this->getMetaData($child);
+
+                if ($this->matches($arrFileData)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
     /** @param mixed[] $element */
     abstract protected function generateLink(array $element): string;
