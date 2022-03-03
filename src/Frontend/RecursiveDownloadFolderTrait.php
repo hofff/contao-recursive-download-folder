@@ -61,6 +61,7 @@ trait RecursiveDownloadFolderTrait
     /**
      * @param Model|Result $objElement
      */
+    // phpcs:ignore SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
     public function __construct($objElement, string $strColumn = 'main')
     {
         /** @psalm-suppress ArgumentTypeCoercion */
