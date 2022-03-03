@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.3]
+
+### Fixed
+
+ - Remove dependency of patchwork/utf8 ([#25](https://github.com/hofff/contao-recursive-download-folder/issues/25))
+ - Fix broken breadcrumb mode
+
 ## [3.2.2]
 
 ### Fixed
