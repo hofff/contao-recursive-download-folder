@@ -176,7 +176,7 @@ trait RecursiveDownloadFolderTrait
 
         if ($this->recursiveDownloadFolderAllowFileSearch) {
             $this->Template->action       = preg_replace('/&(amp;)?/i', '&amp;', Environment::get('indexFreeRequest'));
-            $this->Template->keyword      = trim((string) Input::get('keyword'));
+            $this->Template->keyword      = StringUtil::specialchars(trim((string) Input::get('keyword')));
             $this->Template->noResults    = sprintf($GLOBALS['TL_LANG']['MSC']['sEmpty'], $this->Template->keyword);
             $this->Template->keywordLabel = StringUtil::specialchars(
                 $GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderKeywordLabel']
