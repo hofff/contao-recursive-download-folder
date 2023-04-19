@@ -1,0 +1,4 @@
+services:
+  Hofff\Contao\RecursiveDownloadFolder\EventListener\FilesDcaListener:
+    arguments:
+      - '%kernel.project_dir%'
