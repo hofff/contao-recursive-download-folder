@@ -88,7 +88,7 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
                 break;
             }
 
-            $folder = FilesModel::findByUuid($folder->pid);
+            $folder = FilesModel::findByUuid((string) $folder->pid);
         }
 
         // Breadcrumb is in defined root folders.
