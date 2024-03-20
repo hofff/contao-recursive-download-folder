@@ -1,4 +1,5 @@
 services:
   Hofff\Contao\RecursiveDownloadFolder\EventListener\FilesDcaListener:
+    autoconfigure: true
     arguments:
       - '%kernel.project_dir%'

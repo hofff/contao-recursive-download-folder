@@ -4,25 +4,19 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\RecursiveDownloadFolder\EventListener;
 
-use Contao\CoreBundle\ServiceAnnotation\Callback;
+use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\DataContainer;
 
 use function is_dir;
 
 final class FilesDcaListener
 {
-    /** @var string */
-    private $projectDir;
-
-    public function __construct(string $projectDir)
+    public function __construct(private readonly string $projectDir)
     {
-        $this->projectDir = $projectDir;
     }
 
-    /**
-     * @Callback(table="tl_files", target="config.onload", priority=-1)
-     * @SuppressWarnings(PHPMD.Superglobals)
-     */
+    /** @SuppressWarnings(PHPMD.Superglobals) */
+    #[AsCallback(table: 'tl_files', target: 'config.onload', priority: -1)]
     public function adjustPalettes(DataContainer $dataContainer): void
     {
         if (! $dataContainer->id || ! is_dir($this->projectDir . '/' . $dataContainer->id)) {

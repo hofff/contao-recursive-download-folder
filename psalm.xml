@@ -1,34 +1,29 @@
 <?xml version="1.0"?>
 <psalm
-        errorLevel="8"
-        resolveFromConfigFile="true"
-        hideExternalErrors="true"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns="https://getpsalm.org/schema/config"
-        xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+  errorLevel="3"
+  hideExternalErrors="true"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="https://getpsalm.org/schema/config"
+  xsi:schemaLocation="https://getpsalm.org/schema/config https://getpsalm.org/schema/config"
 >
-    <projectFiles>
-        <directory name="src"/>
-    </projectFiles>
+  <projectFiles>
+    <directory name="src"/>
+    <ignoreFiles>
+      <directory name="src/Resources/contao"/>
+    </ignoreFiles>
+  </projectFiles>
 
-    <issueHandlers>
-        <InternalMethod>
-            <errorLevel type="suppress">
-                <referencedMethod name="Contao\CoreBundle\Framework\Adapter::__call"/>
-                <referencedMethod name="Contao\CoreBundle\Framework\ContaoFramework::getAdapter"/>
-            </errorLevel>
-        </InternalMethod>
-        <DeprecatedMethod>
-            <errorLevel type="suppress">
-                <!-- We still support Contao 4.9 -->
-                <referencedMethod name="Contao\Controller::addImageToTemplate"/>
-            </errorLevel>
-        </DeprecatedMethod>
-    </issueHandlers>
+  <issueHandlers>
+    <UndefinedThisPropertyFetch>
+      <errorLevel type="suppress">
+        <referencedProperty name="Hofff\Contao\RecursiveDownloadFolder\Frontend\Element\RecursiveDownloadFolderElement::$Template"/>
+        <referencedProperty name="Hofff\Contao\RecursiveDownloadFolder\Frontend\Module\RecursiveDownloadFolderModule::$Template"/>
+      </errorLevel>
+    </UndefinedThisPropertyFetch>
+  </issueHandlers>
 
-    <universalObjectCrates>
-        <class name="Contao\BackendTemplate"/>
-        <class name="Contao\File"/>
-        <class name="Contao\FrontendTemplate"/>
-    </universalObjectCrates>
+  <universalObjectCrates>
+    <class name="Contao\BackendTemplate"/>
+    <class name="Contao\FrontendTemplate"/>
+  </universalObjectCrates>
 </psalm>

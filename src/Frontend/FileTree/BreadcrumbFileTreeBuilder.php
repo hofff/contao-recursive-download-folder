@@ -17,7 +17,7 @@ use function urlencode;
 final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
 {
     /** @var FilesModel[] */
-    private $breadcrumb = [];
+    private array $breadcrumb = [];
 
     /** @inheritDoc */
     public function build(array $uuids): array
@@ -49,9 +49,7 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
             $url = $GLOBALS['objPage']->getFrontendUrl();
         }
 
-        $url .= '?path=' . urlencode($element['data']['path']);
-
-        return $url;
+        return $url . '?path=' . urlencode((string) $element['data']['path']);
     }
 
     /**
@@ -63,8 +61,9 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
     {
         $this->breadcrumb = [];
 
-        $path = Input::get('path');
-        if (! $path || $path === '/') {
+        /** @psalm-suppress PossiblyInvalidCast */
+        $path = (string) Input::get('path');
+        if ($path === '' || $path === '/') {
             if (count($rootIds) === 1) {
                 $folder = FilesModel::findByUuid($rootIds[0]);
 
@@ -88,13 +87,13 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
                 break;
             }
 
-            $folder = FilesModel::findByUuid((string) $folder->pid);
+            $folder = FilesModel::findByUuid($folder->pid);
         }
 
         // Breadcrumb is in defined root folders.
         if (! $safe) {
             $this->breadcrumb = [];
-        } elseif ($this->breadcrumb) {
+        } elseif ($this->breadcrumb !== []) {
             $last    = end($this->breadcrumb);
             $rootIds = [(string) $last->uuid];
         }
@@ -103,7 +102,7 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
     /** @return array<int, array<string,mixed>> */
     protected function getElements(FilesModel $objParentFolder, int $level = 1): array
     {
-        if ($level !== 1 && ! $this->breadcrumb) {
+        if ($level !== 1 && $this->breadcrumb === []) {
             return [];
         }
 

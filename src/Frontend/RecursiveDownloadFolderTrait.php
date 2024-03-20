@@ -9,14 +9,19 @@ use Contao\Config;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\CoreBundle\Exception\ResponseException;
+use Contao\CoreBundle\Image\Studio\Studio;
+use Contao\CoreBundle\Routing\ScopeMatcher;
+use Contao\CoreBundle\Security\Authentication\Token\TokenChecker;
 use Contao\Database\Result;
 use Contao\Environment;
 use Contao\File;
 use Contao\FilesModel;
+use Contao\FrontendUser;
 use Contao\Input;
 use Contao\Model;
 use Contao\Model\Collection;
 use Contao\StringUtil;
+use Contao\System;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\BreadcrumbFileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\FileTreeBuilder;
 use Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree\ToggleableFileTreeBuilder;
@@ -29,20 +34,19 @@ use ZipArchive;
 use function assert;
 use function basename;
 use function count;
-use function defined;
 use function dirname;
 use function end;
 use function file_exists;
 use function in_array;
 use function is_array;
+use function is_string;
 use function mb_convert_encoding;
-use function mb_strtoupper;
 use function preg_match;
 use function preg_quote;
 use function preg_replace;
 use function sprintf;
+use function str_starts_with;
 use function strlen;
-use function strpos;
 use function strtolower;
 use function substr;
 use function sys_get_temp_dir;
@@ -53,14 +57,10 @@ trait RecursiveDownloadFolderTrait
 {
     /**
      * Files object
-     *
-     * @var FilesModel|Collection|null
      */
-    protected $objFolder;
+    protected FilesModel|Collection|null $objFolder = null;
 
-    /**
-     * @param Model|Result $objElement
-     */
+    /** @param Model|Result $objElement */
     // phpcs:ignore SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
     public function __construct($objElement, string $strColumn = 'main')
     {
@@ -79,11 +79,15 @@ trait RecursiveDownloadFolderTrait
      */
     public function generate(): string
     {
-        if (defined('TL_MODE') && TL_MODE === 'BE') {
+        $scopeMatcher = System::getContainer()->get('contao.routing.scope_matcher');
+        assert($scopeMatcher instanceof ScopeMatcher);
+        $request = System::getContainer()->get('request_stack')->getMainRequest();
+
+        if ($request && $scopeMatcher->isBackendRequest($request)) {
             $template           = new BackendTemplate('be_wildcard');
             $template->wildcard = sprintf(
                 '### %s ###',
-                mb_strtoupper($GLOBALS['TL_LANG']['FMD']['hofff_recursive-download-folder'][0], 'UTF-8')
+                $GLOBALS['TL_LANG']['FMD']['hofff_recursive-download-folder'][0],
             );
             /** @psalm-suppress UndefinedThisPropertyFetch */
             $template->title = $this->headline ?: $this->name;
@@ -91,9 +95,13 @@ trait RecursiveDownloadFolderTrait
             return $template->parse();
         }
 
+        $tokenChecker = System::getContainer()->get('contao.security.token_checker');
+        assert($tokenChecker instanceof TokenChecker);
+
         // Use the home directory of the current user as file source
-        if ($this->useHomeDir && FE_USER_LOGGED_IN) {
-            $this->import('FrontendUser', 'User');
+        /** @psalm-suppress RiskyTruthyFalsyComparison */
+        if ($this->useHomeDir && $tokenChecker->hasFrontendUser()) {
+            $this->import(FrontendUser::class, 'User');
 
             /** @psalm-suppress UndefinedThisPropertyFetch */
             if ($this->User->assignDir && $this->User->homeDir) {
@@ -113,12 +121,13 @@ trait RecursiveDownloadFolderTrait
         }
 
         $this->objFolder = $collection;
-        $file            = Input::get('file', true);
+        /** @psalm-suppress PossiblyInvalidCast */
+        $file = Input::get('file', true);
 
         // Send the file to the browser and do not send a 404 header (see #4632)
-        if ($file !== '' && $file !== null) {
+        if (is_string($file) && $file !== '') {
             foreach ($this->objFolder as $folder) {
-                if (strpos(dirname($file), $folder->path) !== 0) {
+                if (! str_starts_with(dirname($file), (string) $folder->path)) {
                     continue;
                 }
 
@@ -127,6 +136,14 @@ trait RecursiveDownloadFolderTrait
         }
 
         return parent::generate();
+    }
+
+    public function getProjectDir(): string
+    {
+        $projectDir = System::getContainer()->getParameter('kernel.project_dir');
+        assert(is_string($projectDir));
+
+        return $projectDir;
     }
 
     /**
@@ -145,7 +162,7 @@ trait RecursiveDownloadFolderTrait
             trim(
                 $this->cssID[1]
                 . ' hofff-recursive-download-folder-'
-                . ($this->recursiveDownloadFolderMode ?: 'toggleable')
+                . ($this->recursiveDownloadFolderMode ?: 'toggleable'),
             ),
         ];
 
@@ -156,9 +173,7 @@ trait RecursiveDownloadFolderTrait
                 $url = $GLOBALS['objPage']->getFrontendUrl();
             }
 
-            $url .= '?path=' . $path;
-
-            return $url;
+            return $url . '?path=' . $path;
         };
 
         if ($fileTree['tree']) {
@@ -175,22 +190,31 @@ trait RecursiveDownloadFolderTrait
         $this->Template->searchable = $this->recursiveDownloadFolderAllowFileSearch;
 
         if ($this->recursiveDownloadFolderAllowFileSearch) {
-            $this->Template->action       = preg_replace('/&(amp;)?/i', '&amp;', Environment::get('indexFreeRequest'));
+            $this->Template->action = preg_replace(
+                '/&(amp;)?/i',
+                '&amp;',
+                (string) Environment::get('indexFreeRequest'),
+            );
+            /** @psalm-suppress PossiblyInvalidCast */
             $this->Template->keyword      = StringUtil::specialchars(trim((string) Input::get('keyword')));
             $this->Template->noResults    = sprintf($GLOBALS['TL_LANG']['MSC']['sEmpty'], $this->Template->keyword);
             $this->Template->keywordLabel = StringUtil::specialchars(
-                $GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderKeywordLabel']
+                $GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderKeywordLabel'],
             );
             $this->Template->searchLabel  = StringUtil::specialchars(
-                $GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderSearchLabel']
+                $GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderSearchLabel'],
             );
             $this->Template->resetUrl     = self::addToUrl('keyword=');
             $this->Template->resetLabel   = StringUtil::specialchars(
-                $GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderResetLabel']
+                $GLOBALS['TL_LANG']['MSC']['recursiveDownloadFolderResetLabel'],
             );
         }
 
-        if (defined('TL_MODE') && TL_MODE !== 'BE') {
+        $scopeMatcher = System::getContainer()->get('contao.routing.scope_matcher');
+        assert($scopeMatcher instanceof ScopeMatcher);
+        $request = System::getContainer()->get('request_stack')->getMainRequest();
+
+        if ($request !== null && ! $scopeMatcher->isFrontendRequest($request)) {
             return;
         }
 
@@ -208,10 +232,13 @@ trait RecursiveDownloadFolderTrait
      */
     protected function createTreeBuilder(): FileTreeBuilder
     {
+        $imageStudio = self::getContainer()->get('contao.image.studio');
+        assert($imageStudio instanceof Studio);
+
         if ($this->recursiveDownloadFolderMode === 'breadcrumb') {
-            $treeBuilder = new BreadcrumbFileTreeBuilder();
+            $treeBuilder = new BreadcrumbFileTreeBuilder($imageStudio);
         } else {
-            $treeBuilder = new ToggleableFileTreeBuilder();
+            $treeBuilder = new ToggleableFileTreeBuilder($imageStudio);
         }
 
         $treeBuilder->withThumbnailSize(StringUtil::deserialize($this->size, true));
@@ -253,6 +280,7 @@ trait RecursiveDownloadFolderTrait
 
     protected function downloadAsFile(string $path): void
     {
+        /** @psalm-suppress UndefinedMagicMethod */
         $file = FilesModel::findOneByPath($path);
         if (! $file instanceof FilesModel) {
             throw new BadRequestException();
@@ -287,7 +315,7 @@ trait RecursiveDownloadFolderTrait
         $response->setContentDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             $filename,
-            mb_convert_encoding($filename, 'UTF-8', 'ASCII')
+            mb_convert_encoding($filename, 'UTF-8', 'ASCII'),
         );
         $response->headers->addCacheControlDirective('must-revalidate');
         $response->headers->set('Connection', 'close');
@@ -299,14 +327,12 @@ trait RecursiveDownloadFolderTrait
     /** @param array<int,array<string,mixed>> $elements */
     protected function addElementsToZip(array $elements, ZipArchive $zipArchive, string $rootPath): void
     {
-        assert(defined('TL_ROOT'));
-
         foreach ($elements as $element) {
             switch ($element['type']) {
                 case 'file':
                     $zipArchive->addFile(
-                        TL_ROOT . '/' . $element['model']->path,
-                        substr($element['model']->path, strlen($rootPath))
+                        $this->getProjectDir() . '/' . $element['model']->path,
+                        substr((string) $element['model']->path, strlen($rootPath)),
                     );
                     break;
 
@@ -329,25 +355,23 @@ trait RecursiveDownloadFolderTrait
      */
     protected function sendFile(string $strFile): void
     {
-        assert(defined('TL_ROOT'));
-
         // Make sure there are no attempts to hack the file system
         if (preg_match('@^\.+@', $strFile) || preg_match('@\.+/@', $strFile) || preg_match('@(://)+@', $strFile)) {
             throw new PageNotFoundException('Invalid file name');
         }
 
         // Limit downloads to the files directory
-        if (! preg_match('@^' . preg_quote(Config::get('uploadPath'), '@') . '@i', $strFile)) {
+        if (preg_match('@^' . preg_quote((string) Config::get('uploadPath'), '@') . '@i', $strFile) !== 1) {
             throw new PageNotFoundException('Invalid path');
         }
 
         // Check whether the file exists
-        if (! file_exists(TL_ROOT . '/' . $strFile)) {
+        if (! file_exists($this->getProjectDir() . '/' . $strFile)) {
             throw new PageNotFoundException('File not found');
         }
 
         $objFile         = new File($strFile);
-        $arrAllowedTypes = StringUtil::trimsplit(',', strtolower(Config::get('allowedDownload')));
+        $arrAllowedTypes = StringUtil::trimsplit(',', strtolower((string) Config::get('allowedDownload')));
 
         // Check whether the file type is allowed to be downloaded
         if (! $this->recursiveDownloadFolderAllowAll && ! in_array($objFile->extension, $arrAllowedTypes)) {

@@ -28,8 +28,7 @@ class RecursiveDownloadFolderElement extends ContentElement
 
     /**
      * Template
-     *
-     * @var string
      */
+    // phpcs:ignore SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingAnyTypeHint
     protected $strTemplate = 'ce_recursive-download-folder';
 }

@@ -30,8 +30,7 @@ class RecursiveDownloadFolderModule extends Module
 
     /**
      * Template
-     *
-     * @var string
      */
+    // phpcs:ignore SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingAnyTypeHint
     protected $strTemplate = 'mod_hofff_recursive-download-folder';
 }

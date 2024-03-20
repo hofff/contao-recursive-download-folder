@@ -1,0 +1,8 @@
+*
+!/composer.json
+!/composer.lock
+!/.gitignore
+!.env
+!/config
+/config/*
+!/config/config.yaml
