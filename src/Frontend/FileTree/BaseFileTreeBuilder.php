@@ -318,8 +318,8 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
             'title'     => StringUtil::specialchars(
                 sprintf($GLOBALS['TL_LANG']['MSC']['download'], $objFile->basename),
             ),
-            'link'      => (string) $meta['title'],
-            'caption'   => (string) $meta['caption'],
+            'link'      => (string) ($meta['title'] ?? ''),
+            'caption'   => (string) ($meta['caption'] ?? ''),
             'href'      => $this->generateDownloadLink($fileModel),
             'filesize'  => Frontend::getReadableSize($objFile->filesize),
             'mime'      => $objFile->mime,
