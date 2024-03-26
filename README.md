@@ -32,5 +32,6 @@ Install the extension via composer: [hofff/contao-recursive-download-folder](htt
 
 ## THANK YOU
 
+- Media Motion AG for the support to upgrade to Contao 5
 - U.A.S. Umwelt- und Agrarstudien GmbH for the initial assignment for this extension
 - Nina Gerling - ena Webstudio for the support of development and bug fixing
