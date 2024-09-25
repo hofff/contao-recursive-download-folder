@@ -332,7 +332,7 @@ trait RecursiveDownloadFolderTrait
                 case 'file':
                     $zipArchive->addFile(
                         $this->getProjectDir() . '/' . $element['model']->path,
-                        substr((string) $element['model']->path, strlen($rootPath)),
+                        substr((string) $element['model']->path, strlen($rootPath) + 1),
                     );
                     break;
 
