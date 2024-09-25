@@ -1,9 +1,12 @@
 # Composer
+/composer.lock
 /vendor
-composer.lock
 
-# PHPCQ and related tools
+# PHPCQ
 /.phpcq
+/phpcq.yaml
+
+# Custom
 .phpcq.yaml
 .phpcs-cache
 .phpunit.result.cache
