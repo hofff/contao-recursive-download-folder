@@ -1,3 +1,34 @@
 {
-  "receipts": ["contao-bundle-4.13-5.3"]
+  "receipts": [
+    "projects/contao-bundle/4.13-5.3"
+  ],
+  "config": {
+    "phpConstraint": "^8.2"
+  },
+  "tools": {
+    "composer": {
+      "namespace": "Hofff\\Contao\\RecursiveDownloadFolder"
+    },
+    "phpcq": {
+      "plugins": {
+        "phpunit": false
+      },
+      "presets": {
+        "composer-require-checker": {
+          "tasks": {
+            "composer-require-checker": {
+              "config": {
+                "config_file": ".composer-require-checker.json"
+              }
+            }
+          }
+        }
+      }
+    },
+    "psalm": {
+      "configuration": {
+        "errorLevel": "3"
+      }
+    }
+  }
 }
