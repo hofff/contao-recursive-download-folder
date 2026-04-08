@@ -484,8 +484,9 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
             return '';
         }
 
-        $imageExtensions = StringUtil::trimsplit(',', Config::get('validImageTypes'));
-        if (! in_array($model->extension, $imageExtensions)) {
+        /** @var array<string> $imageExtensions */
+        $imageExtensions = System::getContainer()->getParameter('contao.image.valid_extensions');
+        if (! in_array($model->extension, $imageExtensions, true)) {
             return '';
         }
 
