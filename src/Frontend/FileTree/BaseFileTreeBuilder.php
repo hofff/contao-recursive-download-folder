@@ -17,6 +17,7 @@ use Contao\Model\Collection;
 use Contao\StringUtil;
 use Contao\System;
 use Exception;
+use Override;
 
 use function array_map;
 use function array_merge;
@@ -101,6 +102,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         return $this;
     }
 
+    #[Override]
     public function hideEmptyFolders(): FileTreeBuilder
     {
         $this->hideEmptyFolders = true;
@@ -108,6 +110,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         return $this;
     }
 
+    #[Override]
     public function showAllLevels(): FileTreeBuilder
     {
         $this->showAllLevels = true;
@@ -115,6 +118,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         return $this;
     }
 
+    #[Override]
     public function allowFileSearch(): FileTreeBuilder
     {
         $this->allowFileSearch = true;
@@ -129,6 +133,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         return $this;
     }
 
+    #[Override]
     public function alwaysShowRoot(): FileTreeBuilder
     {
         $this->alwaysShowRoot = true;
@@ -136,6 +141,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         return $this;
     }
 
+    #[Override]
     public function ignoreAllowedDownloads(): FileTreeBuilder
     {
         $this->ignoreAllowedDownloads = true;
@@ -151,6 +157,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
     }
 
     /** @inheritDoc */
+    #[Override]
     public function build(array $uuids): array
     {
         $folders = FilesModel::findMultipleByUuids($uuids);
@@ -377,8 +384,8 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
             [
                 'level'    => 'level_' . $level,
                 'elements' => $elements,
-                'generateLink' => fn (array $element): string => $this->generateLink($element),
-                'generateThumbnail' => fn (array $element): string => $this->generateThumbnail($element),
+                'generateLink' => $this->generateLink(...),
+                'generateThumbnail' => $this->generateThumbnail(...),
             ],
         );
 
@@ -394,7 +401,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         }
 
         if ($allowedDownloads === null) {
-            $allowedDownloads = array_map('trim', explode(',', strtolower((string) Config::get('allowedDownload'))));
+            $allowedDownloads = array_map(trim(...), explode(',', strtolower((string) Config::get('allowedDownload'))));
         }
 
         return in_array($extension, $allowedDownloads, true);
@@ -410,6 +417,7 @@ abstract class BaseFileTreeBuilder implements FileTreeBuilder
         }
 
         $visibleFileName = $metadata['name'];
+        /** @psalm-suppress RiskyTruthyFalsyComparison */
         if (! empty($metadata['link'])) {
             $visibleFileName = $metadata['link'];
         }

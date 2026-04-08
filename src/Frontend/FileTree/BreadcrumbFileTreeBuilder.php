@@ -6,6 +6,7 @@ namespace Hofff\Contao\RecursiveDownloadFolder\Frontend\FileTree;
 
 use Contao\FilesModel;
 use Contao\Input;
+use Override;
 
 use function array_unshift;
 use function count;
@@ -20,6 +21,7 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
     private array $breadcrumb = [];
 
     /** @inheritDoc */
+    #[Override]
     public function build(array $uuids): array
     {
         $this->buildBreadcrumb($uuids);
@@ -31,6 +33,7 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
     }
 
     /** @inheritDoc */
+    #[Override]
     protected function getChildren(FilesModel $objElement, int $level): array
     {
         return [];
@@ -41,6 +44,7 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
      *
      * @SuppressWarnings(PHPMD.Superglobals)
      */
+    #[Override]
     protected function generateLink(array $element): string
     {
         $url = '';
@@ -100,6 +104,7 @@ final class BreadcrumbFileTreeBuilder extends BaseFileTreeBuilder
     }
 
     /** @return array<int, array<string,mixed>> */
+    #[Override]
     protected function getElements(FilesModel $objParentFolder, int $level = 1): array
     {
         if ($level !== 1 && $this->breadcrumb === []) {

@@ -23,6 +23,7 @@ use Hofff\Contao\RecursiveDownloadFolder\Frontend\RecursiveDownloadFolderTrait;
  * @property mixed  $folderSRC
  * @property mixed  $useHomeDir
  * @psalm-suppress PropertyNotSetInConstructor
+ * @psalm-suppress ClassMustBeFinal
  */
 class RecursiveDownloadFolderModule extends Module
 {

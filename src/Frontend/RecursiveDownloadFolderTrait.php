@@ -128,6 +128,7 @@ trait RecursiveDownloadFolderTrait
         // Send the file to the browser and do not send a 404 header (see #4632)
         if (is_string($file) && $file !== '') {
             foreach ($this->objFolder as $folder) {
+                /** @psalm-suppress RedundantCastGivenDocblockType */
                 if (! str_starts_with(dirname($file), (string) $folder->path)) {
                     continue;
                 }
@@ -301,6 +302,7 @@ trait RecursiveDownloadFolderTrait
 
         $data = $treeBuilder->build([$file->uuid]);
 
+        /** @psalm-suppress PossiblyFalseOperand */
         $zipFile    = tempnam(sys_get_temp_dir(), 'hofff-recursive-download-zip') . '.zip';
         $zipArchive = new ZipArchive();
         $zipArchive->open($zipFile, ZipArchive::CREATE);
@@ -316,7 +318,7 @@ trait RecursiveDownloadFolderTrait
         $response->setContentDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             $filename,
-            mb_convert_encoding($filename, 'UTF-8', 'ASCII'),
+            mb_convert_encoding($filename, 'UTF-8', 'ASCII') ?: $filename,
         );
         $response->headers->addCacheControlDirective('must-revalidate');
         $response->headers->set('Connection', 'close');

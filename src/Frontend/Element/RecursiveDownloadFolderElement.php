@@ -21,6 +21,7 @@ use Hofff\Contao\RecursiveDownloadFolder\Frontend\RecursiveDownloadFolderTrait;
  * @property mixed $recursiveDownloadFolderShowAllSearchResults
  * @property mixed $folderSRC
  * @psalm-suppress PropertyNotSetInConstructor
+ * @psalm-suppress ClassMustBeFinal
  */
 class RecursiveDownloadFolderElement extends ContentElement
 {

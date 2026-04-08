@@ -10,6 +10,7 @@ use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Config\ConfigInterface;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
 use Hofff\Contao\RecursiveDownloadFolder\HofffContaoRecursiveDownloadFolderBundle;
+use Override;
 
 final class Plugin implements BundlePluginInterface
 {
@@ -18,6 +19,7 @@ final class Plugin implements BundlePluginInterface
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
+    #[Override]
     public function getBundles(ParserInterface $parser): array
     {
         return [
