@@ -315,6 +315,8 @@ trait RecursiveDownloadFolderTrait
         $response->setAutoEtag();
 
         $filename = basename($file->path) . '.zip';
+
+        /** @psalm-suppress RiskyTruthyFalsyComparison */
         $response->setContentDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             $filename,
