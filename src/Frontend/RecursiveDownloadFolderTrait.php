@@ -162,7 +162,7 @@ trait RecursiveDownloadFolderTrait
         $this->cssID = [
             $this->cssID[0] ?? '',
             trim(
-                $this->cssID[1] ?? ''
+                ($this->cssID[1] ?? '')
                 . ' hofff-recursive-download-folder-'
                 . ($this->recursiveDownloadFolderMode ?: 'toggleable'),
             ),
